@@ -2,6 +2,7 @@ package no.sonkin.bungeetickets;
 
 import net.md_5.bungee.api.plugin.Plugin;
 import no.sonkin.bungeetickets.commands.ticket.TicketCommand;
+import no.sonkin.bungeetickets.commands.ticketadmin.TicketAdminCommand;
 import no.sonkin.ticketscore.TestClass;
 
 public class BungeeTickets extends Plugin {
@@ -14,6 +15,7 @@ public class BungeeTickets extends Plugin {
         getLogger().info(test.test());
 
         getProxy().getPluginManager().registerCommand(this, new TicketCommand());
+        getProxy().getPluginManager().registerCommand(this, new TicketAdminCommand());
         // Wtf
     }
 }

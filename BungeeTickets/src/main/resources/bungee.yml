@@ -1,0 +1,5 @@
+name: BungeeTickets
+main: no.sonkin.bungeetickets.BungeeTickets
+version: 1.0
+author: sonkin
+description: make tickets
