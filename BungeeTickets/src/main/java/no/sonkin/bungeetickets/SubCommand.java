@@ -8,5 +8,5 @@ public interface SubCommand {
 
     void execute(CommandSender sender, String[] args);
 
-    List<String> onTabComplete(CommandSender commandSender, String[] args);
+    Iterable<String> onTabComplete(CommandSender commandSender, String[] args);
 }
