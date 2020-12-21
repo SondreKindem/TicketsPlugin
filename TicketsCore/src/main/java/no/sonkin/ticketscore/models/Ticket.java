@@ -6,9 +6,10 @@ import java.util.UUID;
 public class Ticket {
     private int ID;
     private String title;
-    private String desc;
+    private String description;
     private UUID playerUUID;
     private String playerName;
+    private String serverName;
     private Timestamp created;
     private Timestamp updated;
 }
