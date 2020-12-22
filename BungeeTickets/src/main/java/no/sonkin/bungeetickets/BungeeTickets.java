@@ -19,7 +19,6 @@ import java.util.logging.Level;
 public class BungeeTickets extends Plugin {
 
     private Configuration config;
-    private Connection connection;
 
     @Override
     public void onEnable() {
@@ -30,17 +29,21 @@ public class BungeeTickets extends Plugin {
         getLogger().info(test.test());
 
         loadConfig();
-        setupDB();
 
         getProxy().getPluginManager().registerCommand(this, new TicketCommand());
         getProxy().getPluginManager().registerCommand(this, new TicketAdminCommand());
 
-        TicketsCore ticketsCore = new TicketsCore(connection);
+        try {
+            TicketsCore ticketsCore = new TicketsCore(getDataFolder());
+        } catch (IOException | ClassNotFoundException | SQLException ex) {
+            getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     /**
      * Parse the config.yml file. Create it if it does not exist
      */
+    @SuppressWarnings({"ResultOfMethodCallIgnored", "UnstableApiUsage"})
     private void loadConfig() {
         try {
             getLogger().info("Trying to load config");
@@ -72,36 +75,5 @@ public class BungeeTickets extends Plugin {
         }
     }
 
-    private Connection setupDB() {
-        getLogger().info("Trying to load database");
 
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdir();
-        }
-
-        // Get database file
-        File database = new File(getDataFolder(), "database.db");
-
-        if(!database.exists()) {
-            try {
-                database.createNewFile();
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, "Error while writing databse.db");
-            }
-        }
-
-        try {
-            if(connection!=null&&!connection.isClosed()){
-                return connection;
-            }
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + database);
-            return connection;
-        } catch (SQLException ex) {
-            getLogger().log(Level.SEVERE,"SQLite exception on initialize", ex);
-        } catch (ClassNotFoundException ex) {
-            getLogger().log(Level.SEVERE, "You need the SQLite JBDC library. Google it. Put it in /lib folder.");
-        }
-        return null;
-    }
 }
