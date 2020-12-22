@@ -12,4 +12,6 @@ public class Ticket {
     private String serverName;
     private Timestamp created;
     private Timestamp updated;
+
+
 }
