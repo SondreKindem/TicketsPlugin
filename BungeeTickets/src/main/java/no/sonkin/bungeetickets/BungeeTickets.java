@@ -1,12 +1,13 @@
 package no.sonkin.bungeetickets;
 
+import co.aikar.commands.BungeeCommandManager;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import no.sonkin.bungeetickets.commands.ticket.TicketCommand;
-import no.sonkin.bungeetickets.commands.ticketadmin.TicketAdminCommand;
+import no.sonkin.bungeetickets.commands.TicketCommand;
+import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.ticketscore.TicketsCore;
 
 import java.io.*;
@@ -26,6 +27,11 @@ public class BungeeTickets extends Plugin {
         // Make the plugin instance available to other classes
         instance = this;
 
+        BungeeCommandManager manager = new BungeeCommandManager(this);
+        manager.enableUnstableAPI("help");
+
+
+
         loadConfig();
         pluginMessager = new PluginMessager();
 
@@ -34,9 +40,8 @@ public class BungeeTickets extends Plugin {
         getProxy().registerChannel("BungeeCord");
 
         // REGISTER COMMANDS
-
-        getProxy().getPluginManager().registerCommand(this, new TicketCommand());
-        getProxy().getPluginManager().registerCommand(this, new TicketAdminCommand());
+        manager.registerCommand(new TicketCommand());
+        manager.registerCommand(new TicketAdminCommand());
 
         // REGISTER LISTENERS
 
