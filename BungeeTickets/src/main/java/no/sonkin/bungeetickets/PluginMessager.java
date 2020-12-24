@@ -35,7 +35,7 @@ public class PluginMessager implements Listener {
 
     @SuppressWarnings("UnstableApiUsage")
     @EventHandler
-    public void on(PluginMessageEvent event)
+    public void pluginMessageRecieved(PluginMessageEvent event)
     {
         if ( !event.getTag().equalsIgnoreCase( "BungeeCord" ) )
         {
