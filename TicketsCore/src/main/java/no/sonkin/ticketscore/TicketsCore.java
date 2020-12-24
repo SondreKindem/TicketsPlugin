@@ -23,7 +23,7 @@ public class TicketsCore {
     public TicketsCore(File dataFolder) throws SQLException, ClassNotFoundException, IOException {
         this.dataFolder = dataFolder;
 
-        setupDB();
+        connection = setupDB();
 
         init();
     }
@@ -62,8 +62,8 @@ public class TicketsCore {
                 return connection;
             }
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + database);
-            return connection;
+            return DriverManager.getConnection("jdbc:sqlite:" + database);
+
         } catch (SQLException ex) {
             throw new SQLException("SQLite exception on initialize");
         } catch (ClassNotFoundException ex) {
