@@ -19,30 +19,37 @@ public class BungeeTickets extends Plugin {
 
     private Configuration config;
     private PluginMessager pluginMessager;
+    private TicketsCore ticketsCore;
 
     @Override
     public void onEnable() {
+        // Make the plugin instance available to other classes
         instance = this;
 
-        // You should not put an enable message in your plugin.
-        // BungeeCord already does so
-        getLogger().info("Yay! It loads!");
-
         loadConfig();
+        pluginMessager = new PluginMessager();
+
+        // REGISTER PLUGIN MESSAGING CHANNEL
 
         getProxy().registerChannel("BungeeCord");
+
+        // REGISTER COMMANDS
 
         getProxy().getPluginManager().registerCommand(this, new TicketCommand());
         getProxy().getPluginManager().registerCommand(this, new TicketAdminCommand());
 
-        pluginMessager = new PluginMessager();
+        // REGISTER LISTENERS
 
         getProxy().getPluginManager().registerListener(this, pluginMessager);
 
         try {
-            TicketsCore ticketsCore = new TicketsCore(getDataFolder());
+            ticketsCore = new TicketsCore(getDataFolder());
         } catch (IOException | ClassNotFoundException | SQLException ex) {
             getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+            getLogger().severe("Disabling plugin!");
+            // There is no actual way of disabling the plugin, so we just disable listeners & commands
+            getProxy().getPluginManager().unregisterListeners(this);
+            getProxy().getPluginManager().unregisterCommands(this);
         }
     }
 
@@ -58,14 +65,15 @@ public class BungeeTickets extends Plugin {
                 getDataFolder().mkdir();
             }
 
-            File config = new File(getDataFolder().getPath(), "config.yml");
+            File configFile = new File(getDataFolder().getPath(), "config.yml");
 
-            if (!config.exists()) {
+            // If the config file does not exist we copy the provided config.yml into the plugin directory
+            if (!configFile.exists()) {
                 try {
-                    config.createNewFile();
+                    configFile.createNewFile();
                     try (InputStream is = getResourceAsStream("config.yml");
-                         OutputStream os = new FileOutputStream(config)) {
-                        ByteStreams.copy(is, os);
+                         OutputStream os = new FileOutputStream(configFile)) {
+                            ByteStreams.copy(is, os);
                     }
                 } catch (IOException e) {
                     getLogger().severe("Could not create the config!");
@@ -73,7 +81,7 @@ public class BungeeTickets extends Plugin {
                 }
             }
 
-            this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(config);
+            this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
 
         } catch (IOException e) {
             getLogger().severe("Error while trying to load the config!");
@@ -87,5 +95,13 @@ public class BungeeTickets extends Plugin {
 
     public PluginMessager getPluginMessager() {
         return pluginMessager;
+    }
+
+    public Configuration getConfig() {
+        return config;
+    }
+
+    public TicketsCore getTicketsCore() {
+        return ticketsCore;
     }
 }
