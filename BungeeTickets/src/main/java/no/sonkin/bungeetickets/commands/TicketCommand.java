@@ -32,6 +32,8 @@ public class TicketCommand extends BaseCommand {
 
     @HelpCommand
     @Description("Display ticket help.")
+    @Syntax("<command>")
+    //TODO: custom command completion for help
     public static void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
     }

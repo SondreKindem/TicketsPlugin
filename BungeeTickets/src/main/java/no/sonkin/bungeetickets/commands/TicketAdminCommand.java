@@ -17,6 +17,7 @@ public class TicketAdminCommand extends BaseCommand {
 
     @HelpCommand
     @Description("Display ticket-admin help.")
+    @Syntax("<command>")
     public static void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
     }
