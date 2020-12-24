@@ -7,31 +7,37 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.ticket.TicketCommand;
 import no.sonkin.bungeetickets.commands.ticketadmin.TicketAdminCommand;
-import no.sonkin.ticketscore.TestClass;
 import no.sonkin.ticketscore.TicketsCore;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class BungeeTickets extends Plugin {
 
+    private static BungeeTickets instance;
+
     private Configuration config;
+    private PluginMessager pluginMessager;
 
     @Override
     public void onEnable() {
+        instance = this;
+
         // You should not put an enable message in your plugin.
         // BungeeCord already does so
         getLogger().info("Yay! It loads!");
-        TestClass test = new TestClass();
-        getLogger().info(test.test());
 
         loadConfig();
 
+        getProxy().registerChannel("BungeeCord");
+
         getProxy().getPluginManager().registerCommand(this, new TicketCommand());
         getProxy().getPluginManager().registerCommand(this, new TicketAdminCommand());
+
+        pluginMessager = new PluginMessager();
+
+        getProxy().getPluginManager().registerListener(this, pluginMessager);
 
         try {
             TicketsCore ticketsCore = new TicketsCore(getDataFolder());
@@ -75,5 +81,11 @@ public class BungeeTickets extends Plugin {
         }
     }
 
+    public static BungeeTickets getInstance() {
+        return instance;
+    }
 
+    public PluginMessager getPluginMessager() {
+        return pluginMessager;
+    }
 }

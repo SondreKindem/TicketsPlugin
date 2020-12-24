@@ -3,8 +3,10 @@ package no.sonkin.bungeetickets.commands.ticket;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
+import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.bungeetickets.SubCommand;
 import no.sonkin.bungeetickets.commands.ticket.subcommands.TicketCreateCommand;
 import no.sonkin.bungeetickets.commands.ticket.subcommands.TicketHelpCommand;
@@ -37,6 +39,7 @@ public class TicketCommand extends Command implements TabExecutor {
             sc.execute(commandSender, strings);
         } else {
             commandSender.sendMessage(new TextComponent("Hey, no args provided"));
+            BungeeTickets.getInstance().getPluginMessager().sendCustomData((ProxiedPlayer) commandSender, "Some text", 12);
         }
     }
 
