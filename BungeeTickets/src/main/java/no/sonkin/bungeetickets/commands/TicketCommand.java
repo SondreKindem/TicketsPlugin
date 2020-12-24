@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class TicketCommand extends BaseCommand {
 
     @Subcommand("create")
-    @Syntax("<message>")
+    @Syntax("<description>")
     @Description("Create a new ticket.")
     @CommandCompletion("<description>")
     public static void create(ProxiedPlayer player, String[] args) {
