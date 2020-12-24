@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="TicketsCore" />
         <module name="BungeeTickets" />
+        <module name="TicketsHelper" />
       </profile>
     </annotationProcessing>
   </component>

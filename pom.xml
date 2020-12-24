@@ -10,6 +10,7 @@
     <modules>
         <module>TicketsCore</module>
         <module>BungeeTickets</module>
+        <module>TicketsHelper</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -23,6 +24,10 @@
         <repository>
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
