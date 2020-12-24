@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
 
 public class TicketsCore {
 
@@ -25,7 +24,7 @@ public class TicketsCore {
 
         connection = setupDB();
 
-        init();
+        // init();
     }
 
     private void init() throws SQLException {
