@@ -28,10 +28,13 @@ public class BungeeTickets extends Plugin {
         // Make the plugin instance available to other classes
         instance = this;
 
+        // SETUP ACF
+
         setupCommandManager();
 
+        // GET CONFIG
+
         loadConfig();
-        pluginMessager = new PluginMessager();
 
         // REGISTER PLUGIN MESSAGING CHANNEL
 
@@ -39,6 +42,7 @@ public class BungeeTickets extends Plugin {
 
         // REGISTER LISTENERS
 
+        pluginMessager = new PluginMessager();
         getProxy().getPluginManager().registerListener(this, pluginMessager);
 
         try {
