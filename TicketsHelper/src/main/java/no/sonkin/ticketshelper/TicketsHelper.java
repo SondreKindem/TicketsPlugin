@@ -44,9 +44,12 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
         else if (subchannel.equals("Location")) {
             getLogger().info("GOT POSITION REQUEST");
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            out.writeUTF("Location");
-            out.writeUTF(in.readUTF());
-            out.writeUTF(player.getLocation().toString());
+            out.writeUTF("Location");  // Subchannel
+            out.writeUTF(in.readUTF());  // Ticket ID
+            out.writeInt((int)player.getLocation().getX());
+            out.writeInt((int)player.getLocation().getY());
+            out.writeInt((int)player.getLocation().getZ());
+            out.writeUTF(player.getLocation().getWorld().getName());
 
             player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
         }

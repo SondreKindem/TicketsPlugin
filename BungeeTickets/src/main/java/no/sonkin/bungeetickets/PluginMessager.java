@@ -87,7 +87,10 @@ public class PluginMessager implements Listener {
 
             ProxyServer.getInstance().getLogger().info("RECEIVED POSITION BACK");
             String ticketID = in.readUTF();  // ticket id
-            String location = in.readUTF();  // location
+            int x = in.readInt();
+            int y = in.readInt();
+            int z = in.readInt();
+            String world = in.readUTF();
 
             if (event.getReceiver() instanceof ProxiedPlayer) {
                 ProxiedPlayer receiver = (ProxiedPlayer) event.getReceiver();
@@ -95,6 +98,11 @@ public class PluginMessager implements Listener {
                 Ticket ticket = BungeeTickets.getInstance().waitingTickets.get(ticketID);
 
                 if(ticket != null) {
+                    ticket.setX(x);
+                    ticket.setY(y);
+                    ticket.setZ(z);
+                    ticket.setWorld(world);
+
                     BungeeTickets.getInstance().waitingTickets.remove(ticketID);
                     // do things
                     receiver.sendMessage(new TextComponent("Created ticket!"));
@@ -103,7 +111,7 @@ public class PluginMessager implements Listener {
                     receiver.sendMessage(new TextComponent("world: " + ticket.getWorld()));
                     receiver.sendMessage(new TextComponent("server: " + ticket.getServerName()));
                     receiver.sendMessage(new TextComponent("by: " + ticket.getPlayerName()));
-                    receiver.sendMessage(new TextComponent("loc: " + location));
+                    receiver.sendMessage(new TextComponent("loc: " + ticket.getX() + ", " + ticket.getY() + ", " + ticket.getZ()));
                     receiver.sendMessage(new TextComponent("================="));
                 }
             }
