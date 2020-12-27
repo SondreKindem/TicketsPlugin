@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.*;
 import net.md_5.bungee.api.CommandSender;
 
 @CommandAlias("ticketadmin|ta")
+@CommandPermission("tickets.admin")
 public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("close")
