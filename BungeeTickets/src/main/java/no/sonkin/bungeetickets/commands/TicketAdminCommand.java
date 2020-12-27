@@ -9,6 +9,7 @@ import net.md_5.bungee.api.CommandSender;
 public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("close")
+    @Syntax("<id> <reason>")
     @CommandCompletion("<id> <reason>")
     @Description("Close a ticket")
     public static void close(CommandSender sender, String[] args) {
@@ -18,6 +19,7 @@ public class TicketAdminCommand extends BaseCommand {
     @HelpCommand
     @Description("Display ticket-admin help.")
     @Syntax("<command>")
+    @CommandCompletion("@ticketAdminHelp")
     public static void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
     }

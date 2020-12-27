@@ -1,6 +1,7 @@
 package no.sonkin.bungeetickets;
 
 import co.aikar.commands.BungeeCommandManager;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -27,10 +28,7 @@ public class BungeeTickets extends Plugin {
         // Make the plugin instance available to other classes
         instance = this;
 
-        BungeeCommandManager manager = new BungeeCommandManager(this);
-        manager.enableUnstableAPI("help");
-
-
+        setupCommandManager();
 
         loadConfig();
         pluginMessager = new PluginMessager();
@@ -38,10 +36,6 @@ public class BungeeTickets extends Plugin {
         // REGISTER PLUGIN MESSAGING CHANNEL
 
         getProxy().registerChannel("BungeeCord");
-
-        // REGISTER COMMANDS
-        manager.registerCommand(new TicketCommand());
-        manager.registerCommand(new TicketAdminCommand());
 
         // REGISTER LISTENERS
 
@@ -56,6 +50,19 @@ public class BungeeTickets extends Plugin {
             getProxy().getPluginManager().unregisterListeners(this);
             getProxy().getPluginManager().unregisterCommands(this);
         }
+    }
+
+    public void setupCommandManager() {
+        BungeeCommandManager manager = new BungeeCommandManager(this);
+        manager.enableUnstableAPI("help");
+
+        // REGISTER COMMAND COMPLETIONS
+        manager.getCommandCompletions().registerCompletion("ticketHelp", c -> ImmutableList.of("help", "create"));
+        manager.getCommandCompletions().registerCompletion("ticketAdminHelp", c -> ImmutableList.of("help", "close"));
+
+        // REGISTER COMMANDS
+        manager.registerCommand(new TicketCommand());
+        manager.registerCommand(new TicketAdminCommand());
     }
 
     /**
