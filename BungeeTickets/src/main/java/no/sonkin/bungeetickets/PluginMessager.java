@@ -45,17 +45,20 @@ public class PluginMessager implements Listener {
         String subChannel = in.readUTF();
         if ( subChannel.equalsIgnoreCase( "Subchannel" ) )
         {
+            ProxyServer.getInstance().getLogger().info("RECIEVED MESSAGE");
             // the receiver is a ProxiedPlayer when a server talks to the proxy
             if ( event.getReceiver() instanceof ProxiedPlayer )
             {
                 ProxiedPlayer receiver = (ProxiedPlayer) event.getReceiver();
                 // do things
+                ProxyServer.getInstance().getLogger().info("FROM " + receiver.getName());
             }
             // the receiver is a server when the proxy talks to a server
             if ( event.getReceiver() instanceof Server )
             {
                 Server receiver = (Server) event.getReceiver();
                 // do things
+                ProxyServer.getInstance().getLogger().info("FROM " + receiver.getInfo().getName());
             }
         }
     }

@@ -1,6 +1,7 @@
 package no.sonkin.ticketshelper;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,6 +29,13 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             // Use the code sample in the 'Response' sections below to read
             // the data.
             getLogger().info("PLUGINMSG RECEIVED");
+            getLogger().info("SENDING BACK!");
+
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Subchannel");
+            out.writeUTF("Argument");
+
+            player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
         }
     }
 
