@@ -25,6 +25,8 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
         }
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
+
+        // Handle generic messages (an example)
         if (subchannel.equals("Subchannel")) {
             // Use the code sample in the 'Response' sections below to read
             // the data.
@@ -34,6 +36,17 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF("Subchannel");
             out.writeUTF("Argument");
+
+            player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+
+        }
+        // Handle location requests
+        else if (subchannel.equals("Location")) {
+            getLogger().info("GOT POSITION REQUEST");
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Location");
+            out.writeUTF(in.readUTF());
+            out.writeUTF(player.getLocation().toString());
 
             player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
         }

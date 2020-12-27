@@ -10,9 +10,11 @@ import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.ticketscore.TicketsCore;
+import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 public class BungeeTickets extends Plugin {
@@ -22,6 +24,8 @@ public class BungeeTickets extends Plugin {
     private Configuration config;
     private PluginMessager pluginMessager;
     private TicketsCore ticketsCore;
+
+    public HashMap<String, Ticket> waitingTickets = new HashMap<>();
 
     @Override
     public void onEnable() {
