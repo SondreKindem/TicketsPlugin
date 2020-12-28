@@ -28,6 +28,8 @@ public class TicketsCore {
         ticketManager = new TicketManager(ticketDao);
 
         TableUtils.createTableIfNotExists(connection, Ticket.class);
+
+        closeConnection();
     }
 
     public Dao<Ticket, String> getTicketDao() {
@@ -45,25 +47,26 @@ public class TicketsCore {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private JdbcConnectionSource getDBConnection() throws SQLException, ClassNotFoundException, IOException {
 
-        if (!dataFolder.exists()) {
-            dataFolder.mkdir();
-        }
-
-        // Get database file
-        File database = new File(dataFolder, "database.db");
-
-        if (!database.exists()) {
-            try {
-                database.createNewFile();
-            } catch (IOException ex) {
-                throw new IOException("Error while writing database.db");
-            }
-        }
-
         try {
             if (connection != null) {
                 return connection;
             }
+
+            if (!dataFolder.exists()) {
+                dataFolder.mkdir();
+            }
+
+            // Get database file
+            File database = new File(dataFolder, "database.db");
+
+            if (!database.exists()) {
+                try {
+                    database.createNewFile();
+                } catch (IOException ex) {
+                    throw new IOException("Error while writing database.db");
+                }
+            }
+
             Class.forName("org.sqlite.JDBC");
             return new JdbcConnectionSource("jdbc:sqlite:" + database);
 
