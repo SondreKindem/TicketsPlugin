@@ -10,9 +10,6 @@ import no.sonkin.ticketscore.models.Ticket;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.UUID;
 
 public class TicketsCore {
 
@@ -38,17 +35,6 @@ public class TicketsCore {
         ticketManager = new TicketManager(ticketDao);
 
         TableUtils.createTableIfNotExists(connection, Ticket.class);
-
-        Ticket ticket = new Ticket();
-        ticket.setPlayerName("Sonk1n");
-        ticket.setDescription("Heisann");
-        ticket.setPlayerUUID(UUID.randomUUID());
-        ticket.setCreated(new Timestamp(System.currentTimeMillis()));
-        //ticket.setUpdated(new Date(System.currentTimeMillis()));
-
-        ticketDao.create(ticket);
-
-        // init();
     }
 
     private void init() throws SQLException {
