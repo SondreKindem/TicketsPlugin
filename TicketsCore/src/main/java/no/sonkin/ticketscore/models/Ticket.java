@@ -27,7 +27,7 @@ public class Ticket {
     private Integer y;
     @DatabaseField
     private String world;
-    @DatabaseField(canBeNull = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @DatabaseField(canBeNull = false)
     private Timestamp created;
     @DatabaseField(version = true)
     private Timestamp updated;
