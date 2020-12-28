@@ -76,7 +76,7 @@ public class TicketsCore {
             try {
                 database.createNewFile();
             } catch (IOException ex) {
-                throw new IOException("Error while writing databse.db");
+                throw new IOException("Error while writing database.db");
             }
         }
 
@@ -88,7 +88,7 @@ public class TicketsCore {
             return new JdbcConnectionSource("jdbc:sqlite:" + database);
 
         } catch (SQLException ex) {
-            throw new SQLException("SQLite exception on initialize");
+            throw new SQLException("Jdbc threw error while creating connection source");
         } catch (ClassNotFoundException ex) {
             throw new ClassNotFoundException("Could not find the Sqlite JDBC library");
         }
