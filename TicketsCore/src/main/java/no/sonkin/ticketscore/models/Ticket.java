@@ -1,19 +1,34 @@
 package no.sonkin.ticketscore.models;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.sql.Timestamp;
 import java.util.UUID;
 
+@DatabaseTable(tableName = "tickets")
 public class Ticket {
+    @DatabaseField(id = true)
     private int ID;
+    @DatabaseField
     private String description;
+    @DatabaseField
     private UUID playerUUID;
+    @DatabaseField
     private String playerName;
-    private String serverName;
+    @DatabaseField
+    private String server;
+    @DatabaseField
     private int x;
+    @DatabaseField
     private int z;
+    @DatabaseField
     private int y;
+    @DatabaseField
     private String world;
+    @DatabaseField
     private Timestamp created;
+    @DatabaseField
     private Timestamp updated;
 
     public int getID() {
@@ -49,11 +64,11 @@ public class Ticket {
     }
 
     public String getServerName() {
-        return serverName;
+        return server;
     }
 
     public void setServerName(String serverName) {
-        this.serverName = serverName;
+        this.server = serverName;
     }
 
     public int getX() {
