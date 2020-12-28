@@ -34,20 +34,26 @@ public class TicketManager {
     }
 
     public boolean closeTicket(Ticket ticket) throws TicketException {
-        try {
-            Ticket retrievedTicket = ticketDao.queryForId(String.valueOf(ticket.getID()));
+        return markTicketClosed(ticket.getID());
+    }
 
-            if (retrievedTicket != null) {
-                retrievedTicket.close();
-                ticketDao.update(retrievedTicket);
+    public boolean closeTicket(int id) throws TicketException {
+        return markTicketClosed(id);
+    }
+
+    private boolean markTicketClosed(int id) throws TicketException {
+        try {
+            Ticket ticket = ticketDao.queryForId(String.valueOf(id));
+            if (ticket != null) {
+                ticket.close();
+                ticketDao.update(ticket);
                 return true;
             } else {
                 throw new TicketException("Could not find the requested ticket");
             }
-
         } catch (SQLException ex) {
             ex.printStackTrace();
-            throw new TicketException("Encountered sql error while creating ticket: " + ex.getMessage());
+            throw new TicketException("Encountered sql error while closing ticket: " + ex.getMessage());
         }
     }
 
