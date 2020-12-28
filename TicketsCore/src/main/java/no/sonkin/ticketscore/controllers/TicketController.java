@@ -1,4 +1,4 @@
-package no.sonkin.ticketscore.managers;
+package no.sonkin.ticketscore.controllers;
 
 import com.j256.ormlite.dao.Dao;
 import no.sonkin.ticketscore.exceptions.TicketException;
@@ -9,11 +9,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
-public class TicketManager {
+public class TicketController {
 
     private Dao<Ticket, String> ticketDao;
 
-    public TicketManager(Dao<Ticket, String> ticketDao) {
+    public TicketController(Dao<Ticket, String> ticketDao) {
         this.ticketDao = ticketDao;
     }
 

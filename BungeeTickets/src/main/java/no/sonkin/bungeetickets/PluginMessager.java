@@ -14,7 +14,6 @@ import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.Collection;
-import java.util.HashMap;
 
 public class PluginMessager implements Listener {
 
@@ -112,7 +111,7 @@ public class PluginMessager implements Listener {
 
                     BungeeTickets.getInstance().waitingTickets.remove(ticketID);
                     try {
-                        BungeeTickets.getInstance().getTicketsCore().getTicketManager().createTicket(ticket);
+                        BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
 
                         // do things
                         receiver.sendMessage(new TextComponent("Created ticket!"));

@@ -20,7 +20,7 @@ public class TicketAdminCommand extends BaseCommand {
         try {
             if (args.length > 0) {
                 int id = Integer.parseInt(args[0]);
-                BungeeTickets.getInstance().getTicketsCore().getTicketManager().closeTicket(id);
+                BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id);
             }
         } catch (TicketException e) {
             sender.sendMessage(new TextComponent("§cCould not close ticket! Reason:\n" + e.getMessage()));
