@@ -4,11 +4,11 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import no.sonkin.ticketscore.managers.TicketManager;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -19,6 +19,7 @@ public class TicketsCore {
     private JdbcConnectionSource connection;
     private File dataFolder;
     private Dao<Ticket, String> ticketDao;
+    private TicketManager ticketManager;
 
     public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS table_name (" + // make sure to put your table name in here too.
             "`player` varchar(32) NOT NULL," + // This creates the different colums you will save data too. varchar(32) Is a string, int = integer
@@ -34,6 +35,8 @@ public class TicketsCore {
 
         ticketDao = DaoManager.createDao(connection, Ticket.class);
 
+        ticketManager = new TicketManager(ticketDao);
+
         TableUtils.createTableIfNotExists(connection, Ticket.class);
 
         Ticket ticket = new Ticket();
@@ -45,8 +48,6 @@ public class TicketsCore {
 
         ticketDao.create(ticket);
 
-        List<Ticket> tickets = ticketDao.queryForAll();
-
         // init();
     }
 
@@ -56,6 +57,10 @@ public class TicketsCore {
 
     public Dao<Ticket, String> getTicketDao() {
         return ticketDao;
+    }
+
+    public TicketManager getTicketManager() {
+        return ticketManager;
     }
 
     public void closeConnection() throws IOException {
