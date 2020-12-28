@@ -8,10 +8,12 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
+import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 import org.sqlite.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @CommandAlias("ticket")
@@ -22,7 +24,7 @@ public class TicketCommand extends BaseCommand {
     @Description("Create a new ticket.")
     @CommandCompletion("<description>")
     public static void create(ProxiedPlayer player, String[] args) {
-        if(args.length > 0) {
+        if (args.length > 0) {
             player.sendMessage(new TextComponent("Created a new ticket!"));
             player.sendMessage(new TextComponent(Arrays.toString(args)));
 
@@ -43,6 +45,39 @@ public class TicketCommand extends BaseCommand {
             player.sendMessage(new TextComponent("§cMissing ticket description!"));
         }
 
+    }
+
+    @Subcommand("list")
+    @Description("List your open tickets")
+    @Syntax("[include-closed( true | false )]")
+    @CommandCompletion("false|true")
+    public static void list(ProxiedPlayer player, String[] args) {
+        try {
+            // Parse args
+            boolean includeClosed = false;
+            if (args.length > 0 && args[0].equals("true")) {
+                includeClosed = true;
+            }
+
+            // Get and display list
+            List<Ticket> tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketsByPlayer(player.getUniqueId(), includeClosed);
+
+            if (tickets.isEmpty()) {
+                player.sendMessage(new TextComponent("You have no tickets :)"));
+            } else {
+                player.sendMessage(new TextComponent("\n§6==Here are your tickets!=="));
+                player.sendMessage(new TextComponent("§9---------------------------"));
+
+                for (Ticket ticket : tickets) {
+                    player.sendMessage(new TextComponent(ticket.getID() + ": " + ticket.getDescription()));
+                    player.sendMessage(new TextComponent("by: §6" + ticket.getPlayerName() + " §ron §6" + ticket.getServerName()));
+                    player.sendMessage(new TextComponent("§9---------------------------"));
+                }
+            }
+
+        } catch (TicketException e) {
+            e.printStackTrace();
+        }
     }
 
     @HelpCommand

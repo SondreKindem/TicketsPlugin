@@ -60,6 +60,7 @@ public class TicketController {
     public List<Ticket> getAllTickets() throws TicketException {
         try {
             return ticketDao.queryForAll();
+            //return ticketDao.queryForEq("playerUUID", UUID.fromString("82acdd97-2aef-4094-8463-f6e80eb91ac9"));
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -77,10 +78,27 @@ public class TicketController {
         }
     }
 
+    public List<Ticket> getTicketsByPlayer(UUID playerUUID, boolean includeClosed) throws TicketException {
+        try {
+            if (includeClosed) {
+                return getTicketsByPlayer(playerUUID);
+            } else {
+                return ticketDao.queryBuilder().where()
+                        .eq("playerUUID", playerUUID)
+                        .and()
+                        .eq("closed", false)
+                        .query();
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
     public List<Ticket> getTicketsByPlayer(UUID playerUUID) throws TicketException {
         try {
-            return ticketDao.queryForEq("playerUUID", playerUUID.toString());
-
+            return ticketDao.queryForEq("playerUUID", playerUUID);
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
