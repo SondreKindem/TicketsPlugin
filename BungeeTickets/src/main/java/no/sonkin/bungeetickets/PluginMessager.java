@@ -10,6 +10,7 @@ import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.Collection;
@@ -37,9 +38,9 @@ public class PluginMessager implements Listener {
     /**
      * Send a plugin message requesting the positon of a player
      * @param player The player we want to get the location of
-     * @param ticketID
+     * @param ticketKey the key for the ticket
      */
-    public void requestLocation(ProxiedPlayer player, String ticketID) {
+    public void requestLocation(ProxiedPlayer player, String ticketKey) {
         Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
         // perform a check to see if globally are no players
         if (networkPlayers == null || networkPlayers.isEmpty()) {
@@ -48,12 +49,18 @@ public class PluginMessager implements Listener {
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Location");
-        out.writeUTF(ticketID);
+        out.writeUTF(ticketKey);
 
         // Send the request
         player.getServer().getInfo().sendData("BungeeCord", out.toByteArray());
+
+        // TODO: create a timeout for when no location is returned
     }
 
+    /**
+     * This event receives all plugin messages sent on the BungeeCord channel
+     * @param event the received event
+     */
     @SuppressWarnings("UnstableApiUsage")
     @EventHandler
     public void pluginMessageRecieved(PluginMessageEvent event) {
@@ -104,15 +111,23 @@ public class PluginMessager implements Listener {
                     ticket.setWorld(world);
 
                     BungeeTickets.getInstance().waitingTickets.remove(ticketID);
-                    // do things
-                    receiver.sendMessage(new TextComponent("Created ticket!"));
-                    receiver.sendMessage(new TextComponent("================="));
-                    receiver.sendMessage(new TextComponent("desc: " + ticket.getDescription()));
-                    receiver.sendMessage(new TextComponent("world: " + ticket.getWorld()));
-                    receiver.sendMessage(new TextComponent("server: " + ticket.getServerName()));
-                    receiver.sendMessage(new TextComponent("by: " + ticket.getPlayerName()));
-                    receiver.sendMessage(new TextComponent("loc: " + ticket.getX() + ", " + ticket.getY() + ", " + ticket.getZ()));
-                    receiver.sendMessage(new TextComponent("================="));
+                    try {
+                        BungeeTickets.getInstance().getTicketsCore().getTicketManager().createTicket(ticket);
+
+                        // do things
+                        receiver.sendMessage(new TextComponent("Created ticket!"));
+                        receiver.sendMessage(new TextComponent("================="));
+                        receiver.sendMessage(new TextComponent("desc: " + ticket.getDescription()));
+                        receiver.sendMessage(new TextComponent("world: " + ticket.getWorld()));
+                        receiver.sendMessage(new TextComponent("server: " + ticket.getServerName()));
+                        receiver.sendMessage(new TextComponent("by: " + ticket.getPlayerName()));
+                        receiver.sendMessage(new TextComponent("loc: " + ticket.getX() + ", " + ticket.getY() + ", " + ticket.getZ()));
+                        receiver.sendMessage(new TextComponent("================="));
+
+                    } catch (TicketException e) {
+                        receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
+                    }
+
                 }
             }
         }
