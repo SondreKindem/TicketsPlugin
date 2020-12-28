@@ -3,32 +3,33 @@ package no.sonkin.ticketscore.models;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Date;
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @DatabaseTable(tableName = "tickets")
 public class Ticket {
     @DatabaseField(id = true)
-    private int ID;
-    @DatabaseField
+    private Integer ID;
+    @DatabaseField(canBeNull = false)
     private String description;
-    @DatabaseField
+    @DatabaseField(canBeNull = false)
     private UUID playerUUID;
-    @DatabaseField
+    @DatabaseField(canBeNull = false)
     private String playerName;
     @DatabaseField
     private String server;
     @DatabaseField
-    private int x;
+    private Integer x;
     @DatabaseField
-    private int z;
+    private Integer z;
     @DatabaseField
-    private int y;
+    private Integer y;
     @DatabaseField
     private String world;
-    @DatabaseField
+    @DatabaseField(canBeNull = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp created;
-    @DatabaseField
+    @DatabaseField(version = true)
     private Timestamp updated;
 
     public int getID() {
@@ -103,19 +104,11 @@ public class Ticket {
         this.world = world;
     }
 
-    public Timestamp getCreated() {
+    public Date getCreated() {
         return created;
     }
 
     public void setCreated(Timestamp created) {
         this.created = created;
-    }
-
-    public Timestamp getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Timestamp updated) {
-        this.updated = updated;
     }
 }
