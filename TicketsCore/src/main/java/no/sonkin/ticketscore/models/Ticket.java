@@ -31,6 +31,8 @@ public class Ticket {
     private Timestamp created;
     @DatabaseField(version = true)
     private Timestamp updated;
+    @DatabaseField(canBeNull = false, defaultValue = "false")
+    private boolean closed;
 
     public int getID() {
         return ID;
@@ -110,5 +112,17 @@ public class Ticket {
 
     public void setCreated(Timestamp created) {
         this.created = created;
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void close() {
+        this.closed = true;
+    }
+
+    public void open() {
+        this.closed = false;
     }
 }
