@@ -9,6 +9,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.ticketscore.models.Ticket;
+import org.sqlite.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -27,12 +28,12 @@ public class TicketCommand extends BaseCommand {
 
             // Create a new ticket
             Ticket ticket = new Ticket();
-            ticket.setDescription(args[0]);
+            ticket.setDescription(String.join(" ", args));  // TODO: all additional args shold be joined automatically?
             ticket.setPlayerUUID(player.getUniqueId());
             ticket.setPlayerName(player.getName());
             ticket.setServerName(ProxyServer.getInstance().getPlayer(player.getUniqueId()).getServer().getInfo().getName());
 
-            String randomID = UUID.randomUUID().toString();  // Temporary random id for the ticket
+            String randomID = UUID.randomUUID().toString();  // Temporary random id for hashMap
 
             BungeeTickets.getInstance().waitingTickets.put(randomID, ticket);  // Store the ticket, so we can append location later
 
