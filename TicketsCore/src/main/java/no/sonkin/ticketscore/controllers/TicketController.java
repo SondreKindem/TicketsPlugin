@@ -17,7 +17,7 @@ public class TicketController {
         this.ticketDao = ticketDao;
     }
 
-    public boolean createTicket(Ticket ticket) throws TicketException {
+    public Ticket createTicket(Ticket ticket) throws TicketException {
         try {
             if (ticket.getCreated() == null) {
                 ticket.setCreated(new Timestamp(System.currentTimeMillis()));
@@ -25,7 +25,7 @@ public class TicketController {
 
             ticketDao.create(ticket);
 
-            return true;
+            return ticket;
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -33,21 +33,21 @@ public class TicketController {
         }
     }
 
-    public boolean closeTicket(Ticket ticket) throws TicketException {
+    public Ticket closeTicket(Ticket ticket) throws TicketException {
         return markTicketClosed(ticket.getID());
     }
 
-    public boolean closeTicket(int id) throws TicketException {
+    public Ticket closeTicket(int id) throws TicketException {
         return markTicketClosed(id);
     }
 
-    private boolean markTicketClosed(int id) throws TicketException {
+    private Ticket markTicketClosed(int id) throws TicketException {
         try {
             Ticket ticket = ticketDao.queryForId(String.valueOf(id));
             if (ticket != null) {
                 ticket.close();
                 ticketDao.update(ticket);
-                return true;
+                return ticket;
             } else {
                 throw new TicketException("Could not find the requested ticket");
             }
