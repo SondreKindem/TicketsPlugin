@@ -78,6 +78,43 @@ public class TicketController {
         }
     }
 
+    public Ticket getTicketById(int id) throws TicketException {
+        try {
+            return ticketDao.queryForId(String.valueOf(id));
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching ticket with id " + id + ": " + ex.getMessage());
+        }
+    }
+
+    public Ticket getTicketByPlayerAndId(int id, UUID uuid) throws TicketException {
+        try {
+            List<Ticket> tickets = ticketDao.queryBuilder().where().eq("ID", id).and().eq("playerUUID", uuid).queryBuilder().limit(1L).query();
+            if (tickets.isEmpty()) {
+                return null;
+            } else {
+                return tickets.get(0);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching ticket with id " + id + ": " + ex.getMessage());
+        }
+    }
+
+    public Ticket getLatestTicket(UUID uuid) throws TicketException {
+        try {
+            List<Ticket> tickets = ticketDao.queryBuilder().where().eq("playerUUID", uuid).queryBuilder().orderBy("created", false).limit(1L).query();
+            if (tickets.isEmpty()) {
+                return null;
+            } else {
+                return tickets.get(0);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching the latest ticket of player: " + ex.getMessage());
+        }
+    }
+
     public List<Ticket> getTicketsByPlayer(UUID playerUUID, boolean includeClosed) throws TicketException {
         try {
             if (includeClosed) {

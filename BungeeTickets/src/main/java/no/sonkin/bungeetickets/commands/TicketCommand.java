@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
+import no.sonkin.bungeetickets.MessageBuilder;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 
@@ -64,7 +65,7 @@ public class TicketCommand extends BaseCommand {
             List<Ticket> tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketsByPlayer(player.getUniqueId(), includeClosed);
 
             if (tickets.isEmpty()) {
-                player.sendMessage(info("You have no tickets :)"));
+                player.sendMessage(MessageBuilder.info("You have no tickets :)"));
             } else {
                 player.sendMessage(new TextComponent("\n§6==Here are your tickets!=="));
                 player.sendMessage(new TextComponent("§9---------------------------"));
@@ -78,6 +79,32 @@ public class TicketCommand extends BaseCommand {
 
         } catch (TicketException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Subcommand("info")
+    @Description("List details for one of your tickets")
+    @Syntax("[id] - defaults to latest ticket")
+    @CommandCompletion("<id>")
+    public static void info(ProxiedPlayer player, String[] args) {
+        try {
+            Ticket ticket;
+            if (args.length > 1) {
+                player.sendMessage(MessageBuilder.error("Expected 1 or 0 arguments, got " + args.length + ". Usage: <id>"));
+                return;
+            } else if (args.length == 1) {
+                ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketByPlayerAndId(Integer.parseInt(args[0]), player.getUniqueId());
+            } else {
+                ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getLatestTicket(player.getUniqueId());
+            }
+
+            if (ticket == null) {
+                player.sendMessage(MessageBuilder.error(args.length == 1 ? "Could not find any tickets by you with id " + args[0] : "Could not find any tickets by you!"));
+            } else {
+                player.sendMessage(MessageBuilder.ticket(ticket));
+            }
+        } catch (TicketException e) {
+            player.sendMessage(MessageBuilder.error(e.getMessage()));
         }
     }
 
