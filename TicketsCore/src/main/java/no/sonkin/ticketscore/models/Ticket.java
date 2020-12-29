@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @DatabaseTable(tableName = "tickets")
 public class Ticket {
-    @DatabaseField(id = true)
+    @DatabaseField(generatedId = true)
     private Integer ID;
     @DatabaseField(canBeNull = false)
     private String description;
