@@ -87,7 +87,7 @@ public class TicketCommand extends BaseCommand {
                 return;
             } else if (args.length == 1) {
                 ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketByPlayerAndId(Integer.parseInt(args[0]), player.getUniqueId());
-            } else {
+            } else {  // No argument
                 ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getLatestTicket(player.getUniqueId());
             }
 

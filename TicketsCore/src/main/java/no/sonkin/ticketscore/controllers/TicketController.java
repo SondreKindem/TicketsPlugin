@@ -22,9 +22,7 @@ public class TicketController {
             if (ticket.getCreated() == null) {
                 ticket.setCreated(new Timestamp(System.currentTimeMillis()));
             }
-
             ticketDao.create(ticket);
-
             return ticket;
 
         } catch (SQLException ex) {
@@ -48,9 +46,11 @@ public class TicketController {
                 ticket.close();
                 ticketDao.update(ticket);
                 return ticket;
+
             } else {
                 throw new TicketException("Could not find the requested ticket");
             }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while closing ticket: " + ex.getMessage());
@@ -60,7 +60,6 @@ public class TicketController {
     public List<Ticket> getAllTickets() throws TicketException {
         try {
             return ticketDao.queryForAll();
-            //return ticketDao.queryForEq("playerUUID", UUID.fromString("82acdd97-2aef-4094-8463-f6e80eb91ac9"));
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -81,6 +80,7 @@ public class TicketController {
     public Ticket getTicketById(int id) throws TicketException {
         try {
             return ticketDao.queryForId(String.valueOf(id));
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching ticket with id " + id + ": " + ex.getMessage());
@@ -95,6 +95,7 @@ public class TicketController {
             } else {
                 return tickets.get(0);
             }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching ticket with id " + id + ": " + ex.getMessage());
@@ -109,6 +110,7 @@ public class TicketController {
             } else {
                 return tickets.get(0);
             }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching the latest ticket of player: " + ex.getMessage());
@@ -136,6 +138,7 @@ public class TicketController {
     public List<Ticket> getTicketsByPlayer(UUID playerUUID) throws TicketException {
         try {
             return ticketDao.queryForEq("playerUUID", playerUUID);
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
