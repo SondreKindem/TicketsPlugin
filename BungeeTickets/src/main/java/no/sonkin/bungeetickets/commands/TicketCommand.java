@@ -67,14 +67,7 @@ public class TicketCommand extends BaseCommand {
             if (tickets.isEmpty()) {
                 player.sendMessage(MessageBuilder.info("You have no tickets :)"));
             } else {
-                player.sendMessage(new TextComponent("\n§6==Here are your tickets!=="));
-                player.sendMessage(new TextComponent("§9---------------------------"));
-
-                for (Ticket ticket : tickets) {
-                    player.sendMessage(new TextComponent(ticket.getID() + ": " + ticket.getDescription()));
-                    player.sendMessage(new TextComponent("by: §6" + ticket.getPlayerName() + " §ron §6" + ticket.getServerName()));
-                    player.sendMessage(new TextComponent("§9---------------------------"));
-                }
+                player.sendMessage(MessageBuilder.ticketSummary(tickets));
             }
 
         } catch (TicketException e) {
