@@ -10,11 +10,12 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
-import org.sqlite.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import static no.sonkin.bungeetickets.MessageBuilder.*;
 
 @CommandAlias("ticket")
 public class TicketCommand extends BaseCommand {
@@ -63,7 +64,7 @@ public class TicketCommand extends BaseCommand {
             List<Ticket> tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketsByPlayer(player.getUniqueId(), includeClosed);
 
             if (tickets.isEmpty()) {
-                player.sendMessage(new TextComponent("You have no tickets :)"));
+                player.sendMessage(info("You have no tickets :)"));
             } else {
                 player.sendMessage(new TextComponent("\n§6==Here are your tickets!=="));
                 player.sendMessage(new TextComponent("§9---------------------------"));

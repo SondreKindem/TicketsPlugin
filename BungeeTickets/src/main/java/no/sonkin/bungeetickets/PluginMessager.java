@@ -111,17 +111,11 @@ public class PluginMessager implements Listener {
 
                     BungeeTickets.getInstance().waitingTickets.remove(ticketID);
                     try {
-                        BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
+                        Ticket createdTicket = BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
 
                         // do things
-                        receiver.sendMessage(new TextComponent("Created ticket!"));
-                        receiver.sendMessage(new TextComponent("================="));
-                        receiver.sendMessage(new TextComponent("desc: " + ticket.getDescription()));
-                        receiver.sendMessage(new TextComponent("world: " + ticket.getWorld()));
-                        receiver.sendMessage(new TextComponent("server: " + ticket.getServerName()));
-                        receiver.sendMessage(new TextComponent("by: " + ticket.getPlayerName()));
-                        receiver.sendMessage(new TextComponent("loc: " + ticket.getX() + ", " + ticket.getY() + ", " + ticket.getZ()));
-                        receiver.sendMessage(new TextComponent("================="));
+                        receiver.sendMessage(MessageBuilder.info("Created ticket!"));
+                        receiver.sendMessage(MessageBuilder.ticket(createdTicket));
 
                     } catch (TicketException e) {
                         receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
