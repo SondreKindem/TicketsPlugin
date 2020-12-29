@@ -33,6 +33,8 @@ public class Ticket {
     private Timestamp updated;
     @DatabaseField(canBeNull = false, defaultValue = "false")
     private boolean closed;
+    @DatabaseField
+    private String closedBy;
 
     public int getID() {
         return ID;
@@ -124,5 +126,13 @@ public class Ticket {
 
     public void open() {
         this.closed = false;
+    }
+
+    public String getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(String closedBy) {
+        this.closedBy = closedBy;
     }
 }
