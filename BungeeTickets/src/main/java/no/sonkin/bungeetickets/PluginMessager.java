@@ -41,7 +41,16 @@ public class PluginMessager implements Listener {
         // TODO: create a timeout for when no location is returned
     }
 
-    public void requestTeleport(ProxiedPlayer player, int x, int y, int z, String world){
+    /**
+     * Send a plugin message that tells the relevant server to teleport the player to the supplied location
+     *
+     * @param player the player that will be teleported
+     * @param x      location
+     * @param y      location
+     * @param z      location
+     * @param world  location
+     */
+    public void requestTeleport(ProxiedPlayer player, int x, int y, int z, String world) {
         Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
         // perform a check to see if globally are no players
         if (networkPlayers == null || networkPlayers.isEmpty()) {
@@ -54,8 +63,43 @@ public class PluginMessager implements Listener {
         out.writeInt(y);
         out.writeInt(z);
         out.writeUTF(world);
+        out.writeUTF(player.getName());
 
         player.getServer().getInfo().sendData("BungeeCord", out.toByteArray());
+    }
+
+    /**
+     * Send a plugin message that tells the relevant server to teleport the player to the
+     * supplied location once the player joins the server.
+     * Useful for when the player is not yet on the server
+     *
+     * @param server the server that will teleport the player
+     * @param player the player that will be teleported
+     * @param x      location
+     * @param y      location
+     * @param z      location
+     * @param world  location
+     */
+    public void requestTeleportOnJoin(String server, ProxiedPlayer player, int x, int y, int z, String world) {
+        Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
+        // perform a check to see if globally are no players
+        if (networkPlayers == null || networkPlayers.isEmpty()) {
+            return;
+        }
+
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("TeleportOnJoin");
+        //out.writeUTF("Teleport");  // If the standard teleport is fired before player is fully joined, use "TeleportOnJoin"
+        out.writeInt(x);
+        out.writeInt(y);
+        out.writeInt(z);
+        out.writeUTF(world);
+        out.writeUTF(player.getName());
+
+        // If the player is joining the server at the same time, the player will still be listed as active on the previous server
+        // Even if the server is empty this should be okay, because as soon as the player connection starts the PlayerJoinEvent listener should
+        // be registered. TODO: this could easily break if the server is slow?
+        ProxyServer.getInstance().getServerInfo(server).sendData("BungeeCord", out.toByteArray());
     }
 
     /**

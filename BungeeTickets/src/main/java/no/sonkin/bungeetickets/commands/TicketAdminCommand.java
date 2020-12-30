@@ -43,6 +43,44 @@ public class TicketAdminCommand extends BaseCommand {
         }
     }
 
+    @Subcommand("tp|goto")
+    @Syntax("<id>")
+    @CommandCompletion("<id>")
+    @Description("Teleport to the location the ticket was created at")
+    public static void tpTo(ProxiedPlayer sender, String[] args) {
+        try {
+            if (args.length == 1) {
+                int id = Integer.parseInt(args[0]);
+                Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
+
+                if (ticket.isClosed()) {
+                    sender.sendMessage(MessageBuilder.error("Cannot tp to a closed ticket."));
+                    return;
+                } else if (ticket.getWorld() == null && ticket.getX() == null) {
+                    sender.sendMessage(MessageBuilder.error("Ticket does not have a location"));
+                    return;
+                }
+
+                if (!sender.getServer().getInfo().getName().equals(ticket.getServerName())) {
+                    // If the player is not on the correct server.
+                    // We have to send the player to the server, then make the server tp the player
+                    sender.connect(ProxyServer.getInstance().getServerInfo(ticket.getServerName()));
+                    BungeeTickets.getInstance().getPluginMessager().requestTeleportOnJoin(ticket.getServerName(), sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
+                } else {
+                    BungeeTickets.getInstance().getPluginMessager().requestTeleport(sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
+                }
+                sender.sendMessage(MessageBuilder.info("Teleporting to the ticket location..."));
+
+            } else {
+                sender.sendMessage(MessageBuilder.error("Expected 1 argument: §e<id>"));
+            }
+        } catch (TicketException e) {
+            sender.sendMessage(MessageBuilder.error(e.getMessage()));
+        } catch (NumberFormatException e) {
+            sender.sendMessage(MessageBuilder.error("The provided id was not a number"));
+        }
+    }
+
     @HelpCommand
     @Description("Display ticket-admin help.")
     @Syntax("<command>")

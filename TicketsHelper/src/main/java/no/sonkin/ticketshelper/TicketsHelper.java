@@ -3,10 +3,13 @@ package no.sonkin.ticketshelper;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+
+import java.io.EOFException;
 
 public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
     @Override
@@ -61,8 +64,23 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             int y = in.readInt();
             int z = in.readInt();
             String world = in.readUTF();
+            String playerName = in.readUTF();
 
-            player.teleport(new Location(getServer().getWorld(world), x, y, z));
+            //player.teleport(new Location(getServer().getWorld(world), x, y, z));
+            getServer().getPlayer(playerName).teleport(new Location(getServer().getWorld(world), x, y, z));
+        }
+        //
+        else if(subchannel.equals("TeleportOnJoin")) {
+            getLogger().info("GOT TELEPORT ON JOIN REQUEST");
+            int x = in.readInt();
+            int y = in.readInt();
+            int z = in.readInt();
+            String world = in.readUTF();
+            String playerName = in.readUTF();
+
+            // Register a listener for when the player actually joins the server
+            // The player does not exists before the PlayerJoinEvent on the server, thus we cannot actually tp before this
+            getServer().getPluginManager().registerEvents(new TeleportOnJoinListener(playerName, x, y, z, world), this);
         }
     }
 
