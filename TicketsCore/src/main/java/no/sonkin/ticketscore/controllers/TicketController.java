@@ -31,20 +31,22 @@ public class TicketController {
         }
     }
 
-    public Ticket closeTicket(Ticket ticket) throws TicketException {
-        return markTicketClosed(ticket.getID());
+    public Ticket closeTicket(Ticket ticket, String closedBy) throws TicketException {
+        return markTicketClosed(ticket.getID(), closedBy);
     }
 
-    public Ticket closeTicket(int id) throws TicketException {
-        return markTicketClosed(id);
+    public Ticket closeTicket(int id, String closedBy) throws TicketException {
+        return markTicketClosed(id, closedBy);
     }
 
-    private Ticket markTicketClosed(int id) throws TicketException {
+    private Ticket markTicketClosed(int id, String closedBy) throws TicketException {
         try {
             Ticket ticket = ticketDao.queryForId(String.valueOf(id));
             if (ticket != null) {
                 ticket.close();
+                ticket.setClosedBy(closedBy);
                 ticketDao.update(ticket);
+
                 return ticket;
 
             } else {
