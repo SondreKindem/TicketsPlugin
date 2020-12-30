@@ -41,6 +41,23 @@ public class PluginMessager implements Listener {
         // TODO: create a timeout for when no location is returned
     }
 
+    public void requestTeleport(ProxiedPlayer player, int x, int y, int z, String world){
+        Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
+        // perform a check to see if globally are no players
+        if (networkPlayers == null || networkPlayers.isEmpty()) {
+            return;
+        }
+
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("Teleport");
+        out.writeInt(x);
+        out.writeInt(y);
+        out.writeInt(z);
+        out.writeUTF(world);
+
+        player.getServer().getInfo().sendData("BungeeCord", out.toByteArray());
+    }
+
     /**
      * This event receives all plugin messages sent on the BungeeCord channel
      *

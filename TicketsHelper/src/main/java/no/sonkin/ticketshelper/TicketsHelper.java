@@ -3,6 +3,7 @@ package no.sonkin.ticketshelper;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -52,6 +53,16 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             out.writeUTF(player.getLocation().getWorld().getName());
 
             player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+        }
+        // Handle teleport requests
+        else if(subchannel.equals("Teleport")) {
+            getLogger().info("GOT TELEPORT REQUEST");
+            int x = in.readInt();
+            int y = in.readInt();
+            int z = in.readInt();
+            String world = in.readUTF();
+
+            player.teleport(new Location(getServer().getWorld(world), x, y, z));
         }
     }
 
