@@ -76,7 +76,7 @@ public class Ticket {
         this.server = serverName;
     }
 
-    public int getX() {
+    public Integer getX() {
         return x;
     }
 
@@ -84,7 +84,7 @@ public class Ticket {
         this.x = x;
     }
 
-    public int getZ() {
+    public Integer getZ() {
         return z;
     }
 
@@ -92,7 +92,7 @@ public class Ticket {
         this.z = z;
     }
 
-    public int getY() {
+    public Integer getY() {
         return y;
     }
 
