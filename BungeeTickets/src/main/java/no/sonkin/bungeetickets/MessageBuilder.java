@@ -24,10 +24,11 @@ public class MessageBuilder {
     public static BaseComponent[] ticket(Ticket ticket) {
         return new ComponentBuilder(header)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
-                .append("\n§c§l- §bBy: §a" + ticket.getPlayerName())
-                .append("\n§c§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
-                .append("\n§c§l- §bSubject: §a" + ticket.getDescription())
-                .append("\n§c§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString())
+                .append("\n§e§l- §bBy: §e" + ticket.getPlayerName())
+                .append("\n§e§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
+                .append("\n§e§l- §bStatus: " + (ticket.isClosed() ? "§cCLOSED" : "§aOPEN")).append(ticket.isClosed() ? " §bby §e" + ticket.getClosedBy() : "")
+                .append("\n§e§l- §bSubject: §a" + ticket.getDescription())
+                .append("\n§e§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString())
                 .append("\n" + separator)
                 .create();
     }
@@ -40,7 +41,7 @@ public class MessageBuilder {
             detailsLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6Show more details")));
 
             componentBuilder
-                    .append("\n§bTicket No. §a" + ticket.getID() + "                       ").append(detailsLink)
+                    .append("\n§bTicket No. §a" + ticket.getID()).append(" §b(" + (ticket.isClosed() ? "§cclosed" : "§aopen") + "§b)").append("            ").append(detailsLink)
                     .append("\n§bSubject: §a" + ticket.getDescription())
                     .append("\n§bBy §a" + ticket.getPlayerName() + " §bon §a" + ticket.getServerName())
                     .append("\n" + separator);
