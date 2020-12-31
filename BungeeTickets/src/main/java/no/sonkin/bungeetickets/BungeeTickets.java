@@ -1,6 +1,8 @@
 package no.sonkin.bungeetickets;
 
 import co.aikar.commands.BungeeCommandManager;
+import co.aikar.commands.MessageKeys;
+import co.aikar.commands.MessageType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -75,9 +77,24 @@ public class BungeeTickets extends Plugin {
             }
         });
 
+        manager.getCommandCompletions().registerCompletion("allTicketsForPlayer", c -> {
+            try {
+                return ticketsCore.getTicketController().getTicketsByPlayer(c.getPlayer().getUniqueId())
+                        .stream().map(t -> String.valueOf(t.getID())).collect(Collectors.toList());
+            } catch (TicketException e) {
+                return ImmutableList.of("");
+            }
+        });
+
         // REGISTER COMMANDS
-        manager.registerCommand(new TicketCommand());
-        manager.registerCommand(new TicketAdminCommand());
+        manager.registerCommand(new TicketCommand().setExceptionHandler((command, registeredCommand, sender, args, t) -> {
+            sender.sendMessage(MessageType.ERROR, MessageKeys.ERROR_GENERIC_LOGGED);
+            return true; // mark as handled, default message will not be send to sender
+        }));
+        manager.registerCommand(new TicketAdminCommand().setExceptionHandler((command, registeredCommand, sender, args, t) -> {
+            sender.sendMessage(MessageType.ERROR, MessageKeys.ERROR_GENERIC_LOGGED);
+            return true;
+        }));
     }
 
     /**

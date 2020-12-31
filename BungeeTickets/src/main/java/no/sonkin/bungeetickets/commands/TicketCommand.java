@@ -63,7 +63,7 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("info")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
-    @CommandCompletion("<id>")
+    @CommandCompletion("@allTicketsForPlayer")
     public static void info(ProxiedPlayer player, @Optional Integer id) {
         try {
             Ticket ticket;
