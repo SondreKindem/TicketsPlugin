@@ -18,24 +18,21 @@ public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("close")
     @Syntax("<id>")
-    @CommandCompletion("@allOpenTickets @nothing")
+    @CommandCompletion("@allOpenTickets")
     @Description("Close a ticket")
-    public static void close(CommandSender sender, String[] args) {
+    public static void close(CommandSender sender, Integer id) {
         try {
-            if (args.length > 0) {
-                int id = Integer.parseInt(args[0]);
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
+            sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas closed."));
 
-                Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
-                sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas closed."));
-
-                ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
-                if (ticketOwner.isConnected()) {
-                    ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy()));
-                } else {
-                    // Add to notifications
-                    // TODO: implement some sort of notification system
-                }
+            ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+            if (ticketOwner.isConnected()) {
+                ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy()));
+            } else {
+                // Add to notifications
+                // TODO: implement some sort of notification system
             }
+
         } catch (TicketException e) {
             sender.sendMessage(new TextComponent("§cCould not close ticket! Reason:\n" + e.getMessage()));
         } catch (NumberFormatException e) {
@@ -45,46 +42,39 @@ public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("tp|goto")
     @Syntax("<id>")
-    @CommandCompletion("@allOpenTickets @nothing")
+    @CommandCompletion("@allOpenTickets")
     @Description("Teleport to the location the ticket was created at")
-    public static void tpTo(ProxiedPlayer sender, String[] args) {
+    public static void tpTo(ProxiedPlayer sender, Integer id) {
         try {
-            if (args.length == 1) {
-                int id = Integer.parseInt(args[0]);
-                Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
 
-                if (ticket.isClosed()) {
-                    sender.sendMessage(MessageBuilder.error("Cannot tp to a closed ticket."));
-                    return;
-                } else if (ticket.getWorld() == null && ticket.getX() == null) {
-                    sender.sendMessage(MessageBuilder.error("Ticket does not have a location"));
-                    return;
-                }
-
-                if (!sender.getServer().getInfo().getName().equals(ticket.getServerName())) {
-                    // If the player is not on the correct server.
-                    // We have to send the player to the server, then make the server tp the player
-                    sender.connect(ProxyServer.getInstance().getServerInfo(ticket.getServerName()));
-                    BungeeTickets.getInstance().getPluginMessager().requestTeleportOnJoin(ticket.getServerName(), sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
-                } else {
-                    BungeeTickets.getInstance().getPluginMessager().requestTeleport(sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
-                }
-                sender.sendMessage(MessageBuilder.info("Teleporting to the ticket location..."));
-
-            } else {
-                sender.sendMessage(MessageBuilder.error("Expected 1 argument: §e<id>"));
+            if (ticket.isClosed()) {
+                sender.sendMessage(MessageBuilder.error("Cannot tp to a closed ticket."));
+                return;
+            } else if (ticket.getWorld() == null && ticket.getX() == null) {
+                sender.sendMessage(MessageBuilder.error("Ticket does not have a location"));
+                return;
             }
+
+            if (!sender.getServer().getInfo().getName().equals(ticket.getServerName())) {
+                // If the player is not on the correct server.
+                // We have to send the player to the server, then make the server tp the player
+                sender.connect(ProxyServer.getInstance().getServerInfo(ticket.getServerName()));
+                BungeeTickets.getInstance().getPluginMessager().requestTeleportOnJoin(ticket.getServerName(), sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
+            } else {
+                BungeeTickets.getInstance().getPluginMessager().requestTeleport(sender, ticket.getX(), ticket.getY(), ticket.getZ(), ticket.getWorld());
+            }
+            sender.sendMessage(MessageBuilder.info("Teleporting to the ticket location..."));
+
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
-        } catch (NumberFormatException e) {
-            sender.sendMessage(MessageBuilder.error("The provided id was not a number"));
         }
     }
 
     @HelpCommand
     @Description("Display ticket-admin help.")
     @Syntax("<command>")
-    @CommandCompletion("help|close|tp @nothing")
+    @CommandCompletion("help|close|tp")
     public static void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
     }
