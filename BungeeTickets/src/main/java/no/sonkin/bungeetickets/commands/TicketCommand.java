@@ -16,15 +16,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static no.sonkin.bungeetickets.MessageBuilder.*;
-
 @CommandAlias("ticket")
 public class TicketCommand extends BaseCommand {
 
     @Subcommand("create")
     @Syntax("<description>")
     @Description("Create a new ticket.")
-    @CommandCompletion("<description>")
+    @CommandCompletion("<description> @nothing")
     public static void create(ProxiedPlayer player, String[] args) {
         if (args.length > 0) {
             player.sendMessage(new TextComponent("Created a new ticket!"));
@@ -32,7 +30,7 @@ public class TicketCommand extends BaseCommand {
 
             // Create a new ticket
             Ticket ticket = new Ticket();
-            ticket.setDescription(String.join(" ", args));  // TODO: all additional args shold be joined automatically?
+            ticket.setDescription(String.join(" ", args));  // TODO: all additional args should be joined automatically?
             ticket.setPlayerUUID(player.getUniqueId());
             ticket.setPlayerName(player.getName());
             ticket.setServerName(ProxyServer.getInstance().getPlayer(player.getUniqueId()).getServer().getInfo().getName());
@@ -52,7 +50,7 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("list")
     @Description("List your open tickets")
     @Syntax("[include-closed( true | false )]")
-    @CommandCompletion("false|true")
+    @CommandCompletion("false|true @nothing")
     public static void list(ProxiedPlayer player, String[] args) {
         try {
             // Parse args
@@ -78,7 +76,7 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("info")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
-    @CommandCompletion("<id>")
+    @CommandCompletion("<id> @nothing")
     public static void info(ProxiedPlayer player, String[] args) {
         try {
             Ticket ticket;
@@ -104,7 +102,7 @@ public class TicketCommand extends BaseCommand {
     @HelpCommand
     @Description("Display ticket help.")
     @Syntax("<command>")
-    @CommandCompletion("@ticketHelp")
+    @CommandCompletion("help|create|list|info @nothing")
     public static void onHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
     }

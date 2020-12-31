@@ -67,8 +67,6 @@ public class BungeeTickets extends Plugin {
         manager.enableUnstableAPI("help");
 
         // REGISTER COMMAND COMPLETIONS
-        manager.getCommandCompletions().registerCompletion("ticketHelp", c -> ImmutableList.of("help", "create"));
-        manager.getCommandCompletions().registerCompletion("ticketAdminHelp", c -> ImmutableList.of("help", "close"));
         manager.getCommandCompletions().registerCompletion("allOpenTickets", c -> {
             try {
                 return ticketsCore.getTicketController().getOpenTickets().stream().map(t -> String.valueOf(t.getID())).collect(Collectors.toList());
