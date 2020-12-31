@@ -10,12 +10,14 @@ import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.ticketscore.TicketsCore;
+import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class BungeeTickets extends Plugin {
 
@@ -67,6 +69,13 @@ public class BungeeTickets extends Plugin {
         // REGISTER COMMAND COMPLETIONS
         manager.getCommandCompletions().registerCompletion("ticketHelp", c -> ImmutableList.of("help", "create"));
         manager.getCommandCompletions().registerCompletion("ticketAdminHelp", c -> ImmutableList.of("help", "close"));
+        manager.getCommandCompletions().registerCompletion("allOpenTickets", c -> {
+            try {
+                return ticketsCore.getTicketController().getOpenTickets().stream().map(t -> String.valueOf(t.getID())).collect(Collectors.toList());
+            } catch (TicketException e) {
+                return ImmutableList.of("");
+            }
+        });
 
         // REGISTER COMMANDS
         manager.registerCommand(new TicketCommand());

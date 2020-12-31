@@ -18,7 +18,7 @@ public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("close")
     @Syntax("<id>")
-    @CommandCompletion("<id>")
+    @CommandCompletion("@allOpenTickets")
     @Description("Close a ticket")
     public static void close(CommandSender sender, String[] args) {
         try {
@@ -45,7 +45,7 @@ public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("tp|goto")
     @Syntax("<id>")
-    @CommandCompletion("<id>")
+    @CommandCompletion("@allOpenTickets")
     @Description("Teleport to the location the ticket was created at")
     public static void tpTo(ProxiedPlayer sender, String[] args) {
         try {
