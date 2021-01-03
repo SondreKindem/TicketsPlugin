@@ -5,6 +5,7 @@ import co.aikar.commands.MessageKeys;
 import co.aikar.commands.MessageType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -18,6 +19,7 @@ import no.sonkin.ticketscore.models.Ticket;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -86,6 +88,19 @@ public class BungeeTickets extends Plugin {
             }
         });
 
+        manager.getCommandCompletions().registerCompletion("openTicketsFilter", c -> {
+            // Handle filtering of open tickets. I.e. limit by player name = p:<player>
+            try {
+                if (c.getInput().equals("p:")) {
+                    return ticketsCore.getTicketController().getPlayersWithOpenTickets().stream().map(ticket -> "p:" + ticket.getPlayerName()).collect(Collectors.toList());
+                }
+                return ImmutableList.of("p:");
+            } catch (TicketException e) {
+                getLogger().severe(e.getMessage());
+                return ImmutableList.of("");
+            }
+        });
+
         // REGISTER COMMANDS
         manager.registerCommand(new TicketCommand().setExceptionHandler((command, registeredCommand, sender, args, t) -> {
             sender.sendMessage(MessageType.ERROR, MessageKeys.ERROR_GENERIC_LOGGED);
@@ -117,7 +132,7 @@ public class BungeeTickets extends Plugin {
                     configFile.createNewFile();
                     try (InputStream is = getResourceAsStream("config.yml");
                          OutputStream os = new FileOutputStream(configFile)) {
-                            ByteStreams.copy(is, os);
+                        ByteStreams.copy(is, os);
                     }
                 } catch (IOException e) {
                     getLogger().severe("Could not create the config!");

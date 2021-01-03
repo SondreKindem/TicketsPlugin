@@ -137,6 +137,24 @@ public class TicketController {
         }
     }
 
+    public List<Ticket> getTicketsByPlayer(String playerName, boolean includeClosed) throws TicketException {
+        try {
+            if (includeClosed) {
+                return getTicketsByPlayer(playerName);
+            } else {
+                return ticketDao.queryBuilder().where()
+                        .eq("playerName", playerName)
+                        .and()
+                        .eq("closed", false)
+                        .query();
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
     public List<Ticket> getTicketsByPlayer(UUID playerUUID) throws TicketException {
         try {
             return ticketDao.queryForEq("playerUUID", playerUUID);
@@ -144,6 +162,25 @@ public class TicketController {
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
+    public List<Ticket> getTicketsByPlayer(String playerName) throws TicketException {
+        try {
+            return ticketDao.queryForEq("playerName", playerName);
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
+    public List<Ticket> getPlayersWithOpenTickets() throws TicketException {
+        try {
+            return ticketDao.queryBuilder().selectColumns("playerName").distinct().where().eq("closed", false).query();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while trying to get players with open tickets: " + ex.getMessage());
         }
     }
 }

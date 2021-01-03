@@ -12,6 +12,8 @@ import no.sonkin.bungeetickets.MessageBuilder;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
 
+import java.util.List;
+
 @CommandAlias("ticketadmin|ta")
 @CommandPermission("tickets.admin")
 public class TicketAdminCommand extends BaseCommand {
@@ -66,6 +68,46 @@ public class TicketAdminCommand extends BaseCommand {
             }
             sender.sendMessage(MessageBuilder.info("Teleporting to the ticket location..."));
 
+        } catch (TicketException e) {
+            sender.sendMessage(MessageBuilder.error(e.getMessage()));
+        }
+    }
+
+    @Subcommand("list")
+    @CommandCompletion("@openTicketsFilter")
+    public static void list(ProxiedPlayer sender, @Optional @Single String filter) {
+        try {
+            List<Ticket> tickets;
+
+            // Handle filtering
+            if (filter != null) {
+                String[] filterList = filter.split(":");
+
+                if (filterList.length != 2) {
+                    throw new TicketException("No filter argument");
+                }
+
+                if (filterList[0].equals("p")) {
+                    String playerName = filterList[1];
+                    if (playerName.length() <= 3) {
+                        throw new TicketException("Not a valid player name");
+                    }
+                    tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketsByPlayer(playerName, false);
+                } else {
+                    // If this filter has not been handled
+                    throw new TicketException("Not a valid filter");
+                }
+
+            } else {
+                // return all
+                tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getOpenTickets();
+            }
+
+            if (tickets.isEmpty()) {
+                sender.sendMessage(MessageBuilder.info("No tickets found"));
+            } else {
+                sender.sendMessage(MessageBuilder.ticketSummary(tickets));
+            }
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
         }
