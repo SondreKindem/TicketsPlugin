@@ -36,9 +36,33 @@ public class TicketAdminCommand extends BaseCommand {
             }
 
         } catch (TicketException e) {
-            sender.sendMessage(new TextComponent("§cCould not close ticket! Reason:\n" + e.getMessage()));
+            sender.sendMessage(MessageBuilder.error("Could not close ticket! Reason:\n" + e.getMessage()));
         } catch (NumberFormatException e) {
-            sender.sendMessage(new TextComponent("§cNot a valid ID"));
+            sender.sendMessage(MessageBuilder.error("Not a valid ID"));
+        }
+    }
+
+    @Subcommand("reopen")
+    @Syntax("<id>")
+    @CommandCompletion("@allClosedTickets")
+    @Description("Reopen a ticket")
+    public static void reopen(CommandSender sender, Integer id) {
+        try {
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().reopenTicket(id, sender.getName());
+            sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas reopened."));
+
+            ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+            if (ticketOwner.isConnected()) {
+                ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName()));
+            } else {
+                // Add to notifications
+                // TODO: implement some sort of notification system
+            }
+
+        } catch (TicketException e) {
+            sender.sendMessage(MessageBuilder.error("Could not reopen ticket! Reason:\n" + e.getMessage()));
+        } catch (NumberFormatException e) {
+            sender.sendMessage(MessageBuilder.error("Not a valid ID"));
         }
     }
 
@@ -74,7 +98,9 @@ public class TicketAdminCommand extends BaseCommand {
     }
 
     @Subcommand("list")
+    @Syntax("<filter> = p:<player>, s:<open|closed>")
     @CommandCompletion("@openTicketsFilter")
+    @Description("List tickets. Can filter by player and open/closed")
     public static void list(ProxiedPlayer sender, @Optional @Single String filter) {
         try {
             List<Ticket> tickets;

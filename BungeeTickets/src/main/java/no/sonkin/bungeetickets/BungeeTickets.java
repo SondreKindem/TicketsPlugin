@@ -79,6 +79,14 @@ public class BungeeTickets extends Plugin {
             }
         });
 
+        manager.getCommandCompletions().registerCompletion("allClosedTickets", c -> {
+            try {
+                return ticketsCore.getTicketController().getClosedTickets().stream().map(t -> String.valueOf(t.getID())).collect(Collectors.toList());
+            } catch (TicketException e) {
+                return ImmutableList.of("");
+            }
+        });
+
         manager.getCommandCompletions().registerCompletion("allTicketsForPlayer", c -> {
             try {
                 return ticketsCore.getTicketController().getTicketsByPlayer(c.getPlayer().getUniqueId())

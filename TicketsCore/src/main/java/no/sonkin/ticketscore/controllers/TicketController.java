@@ -59,6 +59,31 @@ public class TicketController {
         }
     }
 
+    public Ticket reopenTicket(int id, String openedBy) throws TicketException {
+        return markTicketOpen(id, openedBy);
+    }
+
+    private Ticket markTicketOpen(int id, String openedBy) throws TicketException {
+        try {
+            Ticket ticket = ticketDao.queryForId(String.valueOf(id));
+            if (ticket != null) {
+                // TODO: add a comment saying who opened it
+                ticket.open();
+                ticket.setClosedBy(null);
+                ticketDao.update(ticket);
+
+                return ticket;
+
+            } else {
+                throw new TicketException("Could not find the requested ticket");
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while opening ticket: " + ex.getMessage());
+        }
+    }
+
     public List<Ticket> getAllTickets() throws TicketException {
         try {
             return ticketDao.queryForAll();
@@ -72,6 +97,16 @@ public class TicketController {
     public List<Ticket> getOpenTickets() throws TicketException {
         try {
             return ticketDao.queryForEq("closed", false);
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
+    public List<Ticket> getClosedTickets() throws TicketException {
+        try {
+            return ticketDao.queryForEq("closed", true);
 
         } catch (SQLException ex) {
             ex.printStackTrace();
