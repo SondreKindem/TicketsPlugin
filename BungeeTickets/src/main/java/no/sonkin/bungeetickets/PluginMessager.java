@@ -125,7 +125,6 @@ public class PluginMessager implements Listener {
             String world = in.readUTF();
 
             if (event.getReceiver() instanceof ProxiedPlayer) {
-                ProxiedPlayer receiver = (ProxiedPlayer) event.getReceiver();
                 Ticket ticket = BungeeTickets.getInstance().waitingTickets.get(ticketID);
 
                 if (ticket != null) {
@@ -134,6 +133,8 @@ public class PluginMessager implements Listener {
                     ticket.setZ(z);
                     ticket.setWorld(world);
                     BungeeTickets.getInstance().waitingTickets.remove(ticketID);
+
+                    ProxiedPlayer receiver = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
 
                     try {
                         Ticket createdTicket = BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
