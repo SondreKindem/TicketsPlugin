@@ -108,7 +108,7 @@ public class PluginMessager implements Listener {
      * @param event the received event
      */
     @EventHandler
-    public void pluginMessageRecieved(PluginMessageEvent event) {
+    public void pluginMessageReceived(PluginMessageEvent event) {
         if (!event.getTag().equalsIgnoreCase("BungeeCord")) {
             return;
         }
