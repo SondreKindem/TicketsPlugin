@@ -58,7 +58,10 @@ public class BungeeTickets extends Plugin {
         getProxy().getPluginManager().registerListener(this, new EventListener());
 
         try {
-            ticketsCore = new TicketsCore(getDataFolder());
+
+            // SET UP TICKETS CORE
+
+            ticketsCore = new TicketsCore(getDataFolder(), config.getString("database"));
         } catch (IOException | ClassNotFoundException | SQLException ex) {
             getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             getLogger().severe("Disabling plugin!");

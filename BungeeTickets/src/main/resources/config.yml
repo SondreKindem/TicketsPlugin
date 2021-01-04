@@ -1,0 +1,2 @@
+# The database type. Accepted databases are h2 (default), sqlite
+database: h2

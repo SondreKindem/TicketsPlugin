@@ -12,6 +12,7 @@ import no.sonkin.ticketscore.models.Ticket;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Locale;
 
 public class TicketsCore {
 
@@ -22,10 +23,10 @@ public class TicketsCore {
     private TicketController ticketController;
     private NotificationController notificationController;
 
-    public TicketsCore(File dataFolder) throws SQLException, ClassNotFoundException, IOException {
+    public TicketsCore(File dataFolder, String dbType) throws SQLException, ClassNotFoundException, IOException {
         this.dataFolder = dataFolder;
 
-        connection = getDBConnection();
+        connection = getDBConnection(dbType);
 
         ticketDao = DaoManager.createDao(connection, Ticket.class);
         notificationDao = DaoManager.createDao(connection, Notification.class);
@@ -47,6 +48,7 @@ public class TicketsCore {
     public TicketController getTicketController() {
         return ticketController;
     }
+
     public NotificationController getNotificationController() {
         return notificationController;
     }
@@ -56,7 +58,8 @@ public class TicketsCore {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private JdbcConnectionSource getDBConnection() throws SQLException, ClassNotFoundException, IOException {
+    private JdbcConnectionSource getDBConnection(String dbType) throws SQLException, ClassNotFoundException {
+        // TODO: add persistent in-memory option https://stackoverflow.com/questions/26562084/how-to-backup-in-memory-database-or-restore-memory-database-from-file
 
         try {
             if (connection != null) {
@@ -67,19 +70,20 @@ public class TicketsCore {
                 dataFolder.mkdir();
             }
 
-            // Get database file
-            File database = new File(dataFolder, "database.db");
-
-            if (!database.exists()) {
-                try {
-                    database.createNewFile();
-                } catch (IOException ex) {
-                    throw new IOException("Error while writing database.db");
+            if (dbType != null && !dbType.equalsIgnoreCase("h2")) {
+                if (dbType.equalsIgnoreCase("sqlite")) {
+                    // Make sure the driver for the database exists
+                    Class.forName("org.sqlite.JDBC");
+                    // Get database file
+                    File database = new File(dataFolder, "database.db");
+                    return new JdbcConnectionSource("jdbc:sqlite:" + database);
                 }
             }
 
-            Class.forName("org.sqlite.JDBC");
-            return new JdbcConnectionSource("jdbc:sqlite:" + database);
+            // Default database is h2
+            Class.forName("org.h2.Driver");
+            File database = new File(dataFolder, "database");
+            return new JdbcConnectionSource("jdbc:h2:" + database.getAbsolutePath());
 
         } catch (SQLException ex) {
             throw new SQLException("Jdbc threw error while creating connection source");
