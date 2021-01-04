@@ -6,20 +6,20 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import no.sonkin.ticketscore.controllers.NotificationController;
 import no.sonkin.ticketscore.controllers.TicketController;
+import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Locale;
 
 public class TicketsCore {
 
     private JdbcConnectionSource connection;
     private File dataFolder;
-    private Dao<Ticket, String> ticketDao;
-    private Dao<Notification, String> notificationDao;
+    private Dao<Ticket, Integer> ticketDao;
+    private Dao<Notification, Integer> notificationDao;
     private TicketController ticketController;
     private NotificationController notificationController;
 
@@ -37,12 +37,9 @@ public class TicketsCore {
 
         TableUtils.createTableIfNotExists(connection, Ticket.class);
         TableUtils.createTableIfNotExists(connection, Notification.class);
+        TableUtils.createTableIfNotExists(connection, Comment.class);
 
         closeConnection();
-    }
-
-    public Dao<Ticket, String> getTicketDao() {
-        return ticketDao;
     }
 
     public TicketController getTicketController() {

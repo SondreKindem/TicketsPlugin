@@ -1,6 +1,8 @@
 package no.sonkin.ticketscore.models;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
@@ -35,6 +37,9 @@ public class Ticket {
     private boolean closed;
     @DatabaseField
     private String closedBy;
+
+    @ForeignCollectionField
+    ForeignCollection<Comment> comments;
 
     public int getID() {
         return ID;
@@ -134,5 +139,9 @@ public class Ticket {
 
     public void setClosedBy(String closedBy) {
         this.closedBy = closedBy;
+    }
+
+    public ForeignCollection<Comment> getComments() {
+        return comments;
     }
 }

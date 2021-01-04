@@ -2,6 +2,7 @@ package no.sonkin.ticketscore.controllers;
 
 import com.j256.ormlite.dao.Dao;
 import no.sonkin.ticketscore.exceptions.TicketException;
+import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.sql.SQLException;
@@ -11,9 +12,9 @@ import java.util.UUID;
 
 public class TicketController {
 
-    private Dao<Ticket, String> ticketDao;
+    private Dao<Ticket, Integer> ticketDao;
 
-    public TicketController(Dao<Ticket, String> ticketDao) {
+    public TicketController(Dao<Ticket, Integer> ticketDao) {
         this.ticketDao = ticketDao;
     }
 
@@ -41,7 +42,7 @@ public class TicketController {
 
     private Ticket markTicketClosed(int id, String closedBy) throws TicketException {
         try {
-            Ticket ticket = ticketDao.queryForId(String.valueOf(id));
+            Ticket ticket = ticketDao.queryForId(id);
             if (ticket != null) {
                 ticket.close();
                 ticket.setClosedBy(closedBy);
@@ -65,7 +66,7 @@ public class TicketController {
 
     private Ticket markTicketOpen(int id, String openedBy) throws TicketException {
         try {
-            Ticket ticket = ticketDao.queryForId(String.valueOf(id));
+            Ticket ticket = ticketDao.queryForId(id);
             if (ticket != null) {
                 // TODO: add a comment saying who opened it
                 ticket.open();
@@ -116,7 +117,7 @@ public class TicketController {
 
     public Ticket getTicketById(int id) throws TicketException {
         try {
-            return ticketDao.queryForId(String.valueOf(id));
+            return ticketDao.queryForId(id);
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -216,6 +217,21 @@ public class TicketController {
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw new TicketException("Encountered sql error while trying to get players with open tickets: " + ex.getMessage());
+        }
+    }
+
+    public Ticket addComment(Comment comment, int ticketID) throws TicketException {
+        try {
+            Ticket ticket = ticketDao.queryForId(ticketID);
+
+            if(ticket.isClosed()) {
+                throw new TicketException("Could not add comment: ticket §a" + ticketID + " §ris closed");
+            }
+
+            ticket.getComments().add(comment);
+            return ticket;
+        } catch (SQLException ex) {
+            throw new TicketException("Could not add comment: " + ex.getMessage());
         }
     }
 }

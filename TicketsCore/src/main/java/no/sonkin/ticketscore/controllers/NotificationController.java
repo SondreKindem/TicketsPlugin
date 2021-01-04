@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class NotificationController {
-    private Dao<Notification, String> notificationDao;
+    private Dao<Notification, Integer> notificationDao;
 
-    public NotificationController(Dao<Notification, String> notificationDao) {
+    public NotificationController(Dao<Notification, Integer> notificationDao) {
         this.notificationDao = notificationDao;
     }
 

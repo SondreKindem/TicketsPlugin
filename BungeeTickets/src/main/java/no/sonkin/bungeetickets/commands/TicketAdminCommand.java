@@ -10,6 +10,7 @@ import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.bungeetickets.MessageBuilder;
 import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
+import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
@@ -166,6 +167,42 @@ public class TicketAdminCommand extends BaseCommand {
             }
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
+        }
+    }
+
+    @Subcommand("comment add")
+    @Description("List details for one of your tickets")
+    @Syntax("[id] - defaults to latest ticket")
+    @CommandCompletion("@allOpenTickets <message>")
+    public static void addComment(ProxiedPlayer player, @Values("@allOpenTickets") Integer id, String message) {
+        try {
+            Comment comment = new Comment();
+            comment.setMessage(message);
+            comment.setPlayerName(player.getName());
+            comment.setPlayerUUID(player.getUniqueId());
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().addComment(comment, id);
+
+            player.sendMessage(MessageBuilder.info("Comment added"));
+
+            // Notify the owner of the ticket that an admin commented
+            ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+
+            Notification notification = new Notification();
+            notification.setRecipientUUID(ticket.getPlayerUUID());
+            notification.setMessage("§a" + comment.getPlayerName() + " §rcommented §a" + comment.getMessage());
+            notification.setTicketId(ticket.getID());
+
+            if (ticketOwner != null && ticketOwner.isConnected()) {
+                ticketOwner.sendMessage(MessageBuilder.notification(notification));
+            } else {
+                // Ticket owner is offline
+                BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
+            }
+
+        } catch (TicketException e) {
+            player.sendMessage(MessageBuilder.error(e.getMessage()));
+        } catch (NotificationException e) {
+            ProxyServer.getInstance().getLogger().severe(e.getMessage());
         }
     }
 
