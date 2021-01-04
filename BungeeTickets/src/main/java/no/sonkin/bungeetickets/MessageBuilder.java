@@ -8,7 +8,6 @@ import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -27,14 +26,8 @@ public class MessageBuilder {
 
     public static BaseComponent[] ticket(Ticket ticket, boolean sentByAdmin) {
 
-        TextComponent commentsLink = new TextComponent(" §b[§eView comments§b]");
-        commentsLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6View comments")));
-        if (sentByAdmin) {
-            commentsLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ticket comments " + ticket.getID()));
-        } else {
-            commentsLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ta comments " + ticket.getID()));
-        }
-
+        String commentsCommand = sentByAdmin ? "/ta comments " + ticket.getID() : "/ticket comments " + ticket.getID();
+        TextComponent commentsLink = createClickableText(" §b[§eView comments§b]", "§6View comments", commentsCommand);
 
         return new ComponentBuilder(header)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
@@ -52,13 +45,8 @@ public class MessageBuilder {
     public static BaseComponent[] ticketSummary(List<Ticket> tickets, boolean sentByAdmin) {
         ComponentBuilder componentBuilder = new ComponentBuilder(header);
         for (Ticket ticket : tickets) {
-            TextComponent detailsLink = new TextComponent("§b[§edetails§b]");
-            detailsLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6Show more details")));
-            if (sentByAdmin) {
-                detailsLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ta info " + ticket.getID()));
-            } else {
-                detailsLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ticket info " + ticket.getID()));
-            }
+            String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
+            TextComponent detailsLink = createClickableText("§b[§edetails§b]", "§6Show more details", infoCommand);
 
             componentBuilder
                     .append("\n§bTicket No. §a" + ticket.getID()).append(" §b(" + (ticket.isClosed() ? "§cclosed" : "§aopen") + "§b)").append("            ").append(detailsLink)
@@ -71,13 +59,8 @@ public class MessageBuilder {
     }
 
     public static BaseComponent[] comments(Ticket ticket, boolean sentByAdmin) {
-        TextComponent infoLink = new TextComponent(" §b[§eview ticket§b]");
-        infoLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6See ticket details")));
-        if (sentByAdmin) {
-            infoLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ta info " + ticket.getID()));
-        } else {
-            infoLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ticket info " + ticket.getID()));
-        }
+        String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
+        TextComponent infoLink = createClickableText(" §b[§eview ticket§b]", "§6See ticket details", infoCommand);
 
         ComponentBuilder componentBuilder = new ComponentBuilder(header)
                 .append("\n§bComments for ticket §a" + ticket.getID()).append(infoLink)
@@ -95,13 +78,15 @@ public class MessageBuilder {
     }
 
     public static BaseComponent[] notification(Notification notification, boolean sentByAdmin) {
-        TextComponent infoLink = new TextComponent(" §b[§eticket§b]");
-        infoLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6See ticket details")));
-        if (sentByAdmin) {
-            infoLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ta info " + notification.getTicketId()));
-        } else {
-            infoLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ticket info " + notification.getTicketId()));
-        }
+        String infoCommand = sentByAdmin ? "/ta info " + notification.getTicketId() : "/ticket info " + notification.getTicketId();
+        TextComponent infoLink = createClickableText(" §b[§eticket§b]", "§6See ticket details", infoCommand);
         return new ComponentBuilder(prefix).append(notification.getMessage()).append(infoLink).create();
+    }
+
+    private static TextComponent createClickableText(String text, String hoverText, String command) {
+        TextComponent clickableText = new TextComponent(text);
+        clickableText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverText)));
+        clickableText.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+        return clickableText;
     }
 }
