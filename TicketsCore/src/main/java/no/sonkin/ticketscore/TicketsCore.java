@@ -4,7 +4,9 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import no.sonkin.ticketscore.controllers.NotificationController;
 import no.sonkin.ticketscore.controllers.TicketController;
+import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.File;
@@ -16,7 +18,9 @@ public class TicketsCore {
     private JdbcConnectionSource connection;
     private File dataFolder;
     private Dao<Ticket, String> ticketDao;
+    private Dao<Notification, String> notificationDao;
     private TicketController ticketController;
+    private NotificationController notificationController;
 
     public TicketsCore(File dataFolder) throws SQLException, ClassNotFoundException, IOException {
         this.dataFolder = dataFolder;
@@ -24,10 +28,14 @@ public class TicketsCore {
         connection = getDBConnection();
 
         ticketDao = DaoManager.createDao(connection, Ticket.class);
+        notificationDao = DaoManager.createDao(connection, Notification.class);
 
         ticketController = new TicketController(ticketDao);
+        notificationController = new NotificationController(notificationDao);
+
 
         TableUtils.createTableIfNotExists(connection, Ticket.class);
+        TableUtils.createTableIfNotExists(connection, Notification.class);
 
         closeConnection();
     }
@@ -38,6 +46,9 @@ public class TicketsCore {
 
     public TicketController getTicketController() {
         return ticketController;
+    }
+    public NotificationController getNotificationController() {
+        return notificationController;
     }
 
     public void closeConnection() throws IOException {

@@ -5,11 +5,12 @@ import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.bungeetickets.MessageBuilder;
+import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
+import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.List;
@@ -28,17 +29,23 @@ public class TicketAdminCommand extends BaseCommand {
             sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas closed."));
 
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
-            if (ticketOwner.isConnected()) {
+            if (ticketOwner != null && ticketOwner.isConnected()) {
                 ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy()));
             } else {
                 // Add to notifications
-                // TODO: implement some sort of notification system
+                Notification notification = new Notification();
+                notification.setTicketId(ticket.getID());
+                notification.setMessage("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy());
+                notification.setRecipientUUID(ticket.getPlayerUUID());
+                BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
 
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error("Could not close ticket! Reason:\n" + e.getMessage()));
         } catch (NumberFormatException e) {
             sender.sendMessage(MessageBuilder.error("Not a valid ID"));
+        } catch (NotificationException e) {
+            ProxyServer.getInstance().getLogger().severe(e.getMessage());
         }
     }
 
@@ -52,17 +59,23 @@ public class TicketAdminCommand extends BaseCommand {
             sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas reopened."));
 
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
-            if (ticketOwner.isConnected()) {
+            if (ticketOwner != null && ticketOwner.isConnected()) {
                 ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName()));
             } else {
                 // Add to notifications
-                // TODO: implement some sort of notification system
+                Notification notification = new Notification();
+                notification.setTicketId(ticket.getID());
+                notification.setMessage("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName());
+                notification.setRecipientUUID(ticket.getPlayerUUID());
+                BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
 
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error("Could not reopen ticket! Reason:\n" + e.getMessage()));
         } catch (NumberFormatException e) {
             sender.sendMessage(MessageBuilder.error("Not a valid ID"));
+        } catch (NotificationException e) {
+            ProxyServer.getInstance().getLogger().severe(e.getMessage());
         }
     }
 

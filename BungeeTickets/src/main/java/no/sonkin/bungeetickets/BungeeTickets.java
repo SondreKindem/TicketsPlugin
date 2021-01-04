@@ -12,6 +12,7 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
+import no.sonkin.bungeetickets.listeners.EventListener;
 import no.sonkin.ticketscore.TicketsCore;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Ticket;
@@ -54,6 +55,7 @@ public class BungeeTickets extends Plugin {
 
         pluginMessager = new PluginMessager();
         getProxy().getPluginManager().registerListener(this, pluginMessager);
+        getProxy().getPluginManager().registerListener(this, new EventListener());
 
         try {
             ticketsCore = new TicketsCore(getDataFolder());

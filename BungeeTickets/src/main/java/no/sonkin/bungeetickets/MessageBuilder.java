@@ -3,6 +3,7 @@ package no.sonkin.bungeetickets;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.Date;
@@ -47,5 +48,12 @@ public class MessageBuilder {
                     .append("\n" + separator);
         }
         return componentBuilder.create();
+    }
+
+    public static BaseComponent[] notification(Notification notification) {
+        TextComponent infoLink = new TextComponent(" §b[§aticket§b]");
+        infoLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ticket info " + notification.getTicketId()));
+        infoLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6See ticket details")));
+        return new ComponentBuilder(prefix).append(notification.getMessage()).append(infoLink).create();
     }
 }
