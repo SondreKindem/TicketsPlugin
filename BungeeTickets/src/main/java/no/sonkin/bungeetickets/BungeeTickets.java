@@ -6,6 +6,7 @@ import co.aikar.commands.MessageType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -21,6 +22,7 @@ import java.io.*;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,28 @@ public class BungeeTickets extends Plugin {
             // SET UP TICKETS CORE
 
             ticketsCore = new TicketsCore(getDataFolder(), config.getString("database"));
+
+            int frequency = config.contains("notify-frequency") ? config.getInt("notify-frequency") : 10;
+            if(frequency > 0) {
+                ProxyServer.getInstance().getScheduler().schedule(this, new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            List<Ticket> openTickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getOpenTickets();
+                            if (openTickets != null && !openTickets.isEmpty()) {
+                                for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+                                    if (player.hasPermission("tickets.admin")) {
+                                        player.sendMessage(MessageBuilder.info("There are §a" + openTickets.size() + " §ropen tickets"));
+                                    }
+                                }
+                            }
+                        } catch (TicketException e) {
+                            ProxyServer.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
+                        }
+                    }
+                }, frequency, frequency, TimeUnit.MINUTES);
+            }
+
         } catch (IOException | ClassNotFoundException | SQLException ex) {
             getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             getLogger().severe("Disabling plugin!");

@@ -1,2 +1,5 @@
 # The database type. Accepted databases are h2 (default), sqlite
 database: h2
+
+# How often should the plugin notify about open tickets, in minutes - 0 = never
+notify-frequency: 10
