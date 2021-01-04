@@ -1,4 +1,5 @@
 **/target
 **/uiDesigner.xml
-dataSources.xml
+**/dataSources.xml
+.idea/dataSources.xml
 **/dataSources
