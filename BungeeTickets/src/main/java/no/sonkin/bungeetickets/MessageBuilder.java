@@ -45,6 +45,7 @@ public class MessageBuilder {
                 .append("\n§e§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString())
                 .append("\n§e§l- §bComments: §a" + ticket.getComments().size()).append(ticket.getComments().isEmpty() ? new TextComponent("") : commentsLink)
                 .append("\n" + separator)
+                .event((ClickEvent) null).event((HoverEvent) null)  // Clear the hover & click
                 .create();
     }
 
@@ -53,7 +54,6 @@ public class MessageBuilder {
         for (Ticket ticket : tickets) {
             TextComponent detailsLink = new TextComponent("§b[§edetails§b]");
             detailsLink.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6Show more details")));
-
             if (sentByAdmin) {
                 detailsLink.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ta info " + ticket.getID()));
             } else {
@@ -63,6 +63,7 @@ public class MessageBuilder {
             componentBuilder
                     .append("\n§bTicket No. §a" + ticket.getID()).append(" §b(" + (ticket.isClosed() ? "§cclosed" : "§aopen") + "§b)").append("            ").append(detailsLink)
                     .append("\n§bSubject: §a" + ticket.getDescription())
+                    .event((ClickEvent) null).event((HoverEvent) null)  // Clear the hover & click
                     .append("\n§bBy §a" + ticket.getPlayerName() + " §bon §a" + ticket.getServerName())
                     .append("\n" + separator);
         }
