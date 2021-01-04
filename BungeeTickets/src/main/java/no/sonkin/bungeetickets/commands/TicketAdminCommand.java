@@ -152,6 +152,23 @@ public class TicketAdminCommand extends BaseCommand {
         }
     }
 
+    @Subcommand("info")
+    @CommandCompletion("@allTickets")
+    @Syntax("<id>")
+    @Description("Show ticket info")
+    public static void info(ProxiedPlayer sender, Integer id) {
+        try {
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
+            if (ticket == null) {
+                sender.sendMessage(MessageBuilder.error("Could not find a ticket with id" + id));
+            } else {
+                sender.sendMessage(MessageBuilder.ticket(ticket));
+            }
+        } catch (TicketException e) {
+            sender.sendMessage(MessageBuilder.error(e.getMessage()));
+        }
+    }
+
     @HelpCommand
     @Description("Display ticket-admin help.")
     @Syntax("<command>")
