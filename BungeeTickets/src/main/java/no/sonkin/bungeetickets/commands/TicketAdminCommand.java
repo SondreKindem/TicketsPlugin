@@ -146,7 +146,7 @@ public class TicketAdminCommand extends BaseCommand {
             if (tickets.isEmpty()) {
                 sender.sendMessage(MessageBuilder.info("No tickets found"));
             } else {
-                sender.sendMessage(MessageBuilder.ticketSummary(tickets));
+                sender.sendMessage(MessageBuilder.ticketSummary(tickets, true));
             }
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
@@ -163,7 +163,7 @@ public class TicketAdminCommand extends BaseCommand {
             if (ticket == null) {
                 sender.sendMessage(MessageBuilder.error("Could not find a ticket with id" + id));
             } else {
-                sender.sendMessage(MessageBuilder.ticket(ticket));
+                sender.sendMessage(MessageBuilder.ticket(ticket, true));
             }
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
@@ -193,7 +193,7 @@ public class TicketAdminCommand extends BaseCommand {
             notification.setTicketId(ticket.getID());
 
             if (ticketOwner != null && ticketOwner.isConnected()) {
-                ticketOwner.sendMessage(MessageBuilder.notification(notification));
+                ticketOwner.sendMessage(MessageBuilder.notification(notification, false));
             } else {
                 // Ticket owner is offline
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
@@ -203,6 +203,21 @@ public class TicketAdminCommand extends BaseCommand {
             player.sendMessage(MessageBuilder.error(e.getMessage()));
         } catch (NotificationException e) {
             ProxyServer.getInstance().getLogger().severe(e.getMessage());
+        }
+    }
+
+    @Subcommand("comments")
+    @CommandCompletion("@allTickets")
+    public static void comments(ProxiedPlayer player, @Values("@allTickets") Integer id) {
+        try {
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
+            if(ticket != null) {
+                player.sendMessage(MessageBuilder.comments(ticket, true));
+            } else {
+                player.sendMessage(MessageBuilder.error("Could not find a ticket with id §a" + id));
+            }
+        } catch (TicketException e) {
+            e.printStackTrace();
         }
     }
 

@@ -141,7 +141,7 @@ public class PluginMessager implements Listener {
 
                         // do things
                         receiver.sendMessage(MessageBuilder.info("Created ticket!"));
-                        receiver.sendMessage(MessageBuilder.ticket(createdTicket));
+                        receiver.sendMessage(MessageBuilder.ticket(createdTicket, false));
 
                     } catch (TicketException e) {
                         receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));

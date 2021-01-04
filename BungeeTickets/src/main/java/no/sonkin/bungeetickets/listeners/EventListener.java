@@ -18,8 +18,9 @@ public class EventListener implements Listener {
         try {
             List<Notification> notifications = BungeeTickets.getInstance().getTicketsCore().getNotificationController().extractNotifications(event.getPlayer().getUniqueId());
             if (notifications != null && !notifications.isEmpty()) {
+                boolean isAdmin = event.getPlayer().hasPermission("tickets.admin");
                 for (Notification notification : notifications) {
-                    event.getPlayer().sendMessage(MessageBuilder.notification(notification));
+                    event.getPlayer().sendMessage(MessageBuilder.notification(notification, isAdmin));
                 }
             }
         } catch (NotificationException e) {
