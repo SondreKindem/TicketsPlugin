@@ -33,6 +33,7 @@ public class PluginMessager implements Listener {
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Location");
+        out.writeUTF(player.getUniqueId().toString());
         out.writeUTF(ticketKey);
 
         // Send the request

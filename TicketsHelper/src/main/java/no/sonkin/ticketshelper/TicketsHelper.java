@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import java.io.EOFException;
+import java.util.UUID;
 
 public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
     @Override
@@ -23,7 +24,7 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+    public void onPluginMessageReceived(String channel, Player firstOnlinePlayer, byte[] message) {
         if (!channel.equals("BungeeCord")) {
             return;
         }
@@ -41,21 +42,28 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             out.writeUTF("Subchannel");
             out.writeUTF("Argument");
 
-            player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+            firstOnlinePlayer.sendPluginMessage(this, "BungeeCord", out.toByteArray());
 
         }
         // Handle location requests
         else if (subchannel.equals("Location")) {
             getLogger().info("GOT POSITION REQUEST");
-            ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            out.writeUTF("Location");  // Subchannel
-            out.writeUTF(in.readUTF());  // Ticket ID
-            out.writeInt((int)player.getLocation().getX());
-            out.writeInt((int)player.getLocation().getY());
-            out.writeInt((int)player.getLocation().getZ());
-            out.writeUTF(player.getLocation().getWorld().getName());
 
-            player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+            Player player = getServer().getPlayer(UUID.fromString(in.readUTF()));
+
+            if (player != null) {
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("Location");  // Subchannel
+                out.writeUTF(in.readUTF());  // Ticket ID
+                out.writeInt((int)player.getLocation().getX());
+                out.writeInt((int)player.getLocation().getY());
+                out.writeInt((int)player.getLocation().getZ());
+                out.writeUTF(player.getLocation().getWorld().getName());
+
+                player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+            } else {
+                getLogger().severe("Error while trying to get player location! Requested player was null.");
+            }
         }
         // Handle teleport requests
         else if(subchannel.equals("Teleport")) {
