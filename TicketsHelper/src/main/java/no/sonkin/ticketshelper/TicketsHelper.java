@@ -74,8 +74,13 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             String world = in.readUTF();
             String playerName = in.readUTF();
 
-            //player.teleport(new Location(getServer().getWorld(world), x, y, z));
-            getServer().getPlayer(playerName).teleport(new Location(getServer().getWorld(world), x, y, z));
+            Player player = getServer().getPlayer(playerName);
+
+            if(player != null) {
+                player.teleport(new Location(getServer().getWorld(world), x, y, z));
+            } else {
+                getLogger().severe("Could not teleport player " + playerName + "! Player was null");
+            }
         }
         //
         else if (subchannel.equals("TeleportOnJoin")) {
