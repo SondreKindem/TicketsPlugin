@@ -29,17 +29,24 @@ public class MessageBuilder {
         String commentsCommand = sentByAdmin ? "/ta comments " + ticket.getID() : "/ticket comments " + ticket.getID();
         TextComponent commentsLink = createClickableText(" §b[§eView comments§b]", "§6View comments", commentsCommand);
 
-        return new ComponentBuilder(header)
+        ComponentBuilder ticketBuilder = new ComponentBuilder(header)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
                 .append("\n§e§l- §bBy: §e" + ticket.getPlayerName())
                 .append("\n§e§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
                 .append("\n§e§l- §bStatus: " + (ticket.isClosed() ? "§cCLOSED" : "§aOPEN")).append(ticket.isClosed() ? " §bby §e" + ticket.getClosedBy() : "")
                 .append("\n§e§l- §bSubject: §a" + ticket.getDescription())
-                .append("\n§e§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString())
-                .append("\n§e§l- §bComments: §a" + ticket.getComments().size()).append(ticket.getComments().isEmpty() ? new TextComponent("") : commentsLink)
-                .append("\n" + separator)
-                .event((ClickEvent) null).event((HoverEvent) null)  // Clear the hover & click
-                .create();
+                .append("\n§e§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString());
+
+        if(ticket.getComments() == null || ticket.getComments().isEmpty()) {
+            ticketBuilder.append("\n§e§l- §bComments: §a0");
+        } else {
+            ticketBuilder.append("\n§e§l- §bComments: §a" + ticket.getComments().size()).append(commentsLink);
+        }
+
+        ticketBuilder.append("\n" + separator)
+                .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+
+        return ticketBuilder.create();
     }
 
     public static BaseComponent[] ticketSummary(List<Ticket> tickets, boolean sentByAdmin) {
