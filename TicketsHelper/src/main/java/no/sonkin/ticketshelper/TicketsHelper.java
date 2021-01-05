@@ -55,9 +55,9 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Location");  // Subchannel
                 out.writeUTF(in.readUTF());  // Ticket ID
-                out.writeInt((int)player.getLocation().getX());
-                out.writeInt((int)player.getLocation().getY());
-                out.writeInt((int)player.getLocation().getZ());
+                out.writeInt((int) player.getLocation().getX());
+                out.writeInt((int) player.getLocation().getY());
+                out.writeInt((int) player.getLocation().getZ());
                 out.writeUTF(player.getLocation().getWorld().getName());
 
                 player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
@@ -66,7 +66,7 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             }
         }
         // Handle teleport requests
-        else if(subchannel.equals("Teleport")) {
+        else if (subchannel.equals("Teleport")) {
             getLogger().info("GOT TELEPORT REQUEST");
             int x = in.readInt();
             int y = in.readInt();
@@ -78,7 +78,7 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
             getServer().getPlayer(playerName).teleport(new Location(getServer().getWorld(world), x, y, z));
         }
         //
-        else if(subchannel.equals("TeleportOnJoin")) {
+        else if (subchannel.equals("TeleportOnJoin")) {
             getLogger().info("GOT TELEPORT ON JOIN REQUEST");
             int x = in.readInt();
             int y = in.readInt();
@@ -92,23 +92,20 @@ public class TicketsHelper extends JavaPlugin implements PluginMessageListener {
         }
     }
 
-    private void checkIfBungee()
-    {
+    private void checkIfBungee() {
         // we check if the server is Spigot/Paper (because of the spigot.yml file)
-        if ( !getServer().getVersion().contains( "Spigot" ) && !getServer().getVersion().contains( "Paper" ) )
-        {
-            getLogger().severe( "You probably run CraftBukkit... Please update atleast to spigot for this to work..." );
-            getLogger().severe( "Plugin disabled!" );
-            getServer().getPluginManager().disablePlugin( this );
+        if (!getServer().getVersion().contains("Spigot") && !getServer().getVersion().contains("Paper")) {
+            getLogger().severe("You probably run CraftBukkit... Please update atleast to spigot for this to work...");
+            getLogger().severe("Plugin disabled!");
+            getServer().getPluginManager().disablePlugin(this);
             return;
         }
         // TODO: this check does not work! Checking for bungee is disabled until this works
-        if ( !getServer().spigot().getConfig().getConfigurationSection("settings").getBoolean( "settings.bungeecord" ) )
-        {
-            getLogger().severe( "This server is not connected to a bungee server." );
-            getLogger().severe( "If the server is already hooked to BungeeCord, please enable it into your spigot.yml aswell." );
-            getLogger().severe( "Plugin disabled!" );
-            getServer().getPluginManager().disablePlugin( this );
+        if (!getServer().spigot().getConfig().getConfigurationSection("settings").getBoolean("settings.bungeecord")) {
+            getLogger().severe("This server is not connected to a bungee server.");
+            getLogger().severe("If the server is already hooked to BungeeCord, please enable it into your spigot.yml aswell.");
+            getLogger().severe("Plugin disabled!");
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 }
