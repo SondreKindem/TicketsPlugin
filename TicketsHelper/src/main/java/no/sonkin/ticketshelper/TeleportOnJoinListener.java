@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
  * Listener that will teleport a given player once that player joins the server
+ * TODO: remove this listener if player does not join withing x seconds
  */
 public class TeleportOnJoinListener implements Listener {
     private String playerName;
