@@ -30,14 +30,16 @@ public class TicketAdminCommand extends BaseCommand {
             sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas closed."));
 
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+
+            Notification notification = new Notification();
+            notification.setTicketId(ticket.getID());
+            notification.setMessage("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy());
+            notification.setRecipientUUID(ticket.getPlayerUUID());
+
             if (ticketOwner != null && ticketOwner.isConnected()) {
-                ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy()));
+                ticketOwner.sendMessage(MessageBuilder.notification(notification, false));
             } else {
-                // Add to notifications TODO: create notification no matter what, and send messagebuilder.notification either way
-                Notification notification = new Notification();
-                notification.setTicketId(ticket.getID());
-                notification.setMessage("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy());
-                notification.setRecipientUUID(ticket.getPlayerUUID());
+                // Add to notifications
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
 
@@ -60,14 +62,16 @@ public class TicketAdminCommand extends BaseCommand {
             sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas reopened."));
 
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+
+            Notification notification = new Notification();
+            notification.setTicketId(ticket.getID());
+            notification.setMessage("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName());
+            notification.setRecipientUUID(ticket.getPlayerUUID());
+
             if (ticketOwner != null && ticketOwner.isConnected()) {
-                ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName()));
+                ticketOwner.sendMessage(MessageBuilder.notification(notification, false));
             } else {
                 // Add to notifications
-                Notification notification = new Notification();
-                notification.setTicketId(ticket.getID());
-                notification.setMessage("Your ticket with id §a" + id + " §rwas reopened by " + sender.getName());
-                notification.setRecipientUUID(ticket.getPlayerUUID());
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
 
@@ -115,6 +119,7 @@ public class TicketAdminCommand extends BaseCommand {
     @Syntax("<filter> = p:<player>, s:<open|closed>")
     @CommandCompletion("@openTicketsFilter")
     @Description("List tickets. Can filter by player and open/closed")
+    // TODO: add option to see only open, closed or all
     public static void list(ProxiedPlayer sender, @Optional @Single String filter) {
         try {
             List<Ticket> tickets;
