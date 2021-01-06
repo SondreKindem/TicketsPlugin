@@ -13,4 +13,7 @@
 
 ## Build
 
+Remove the maven-resources-plugin or change the path in the `pom.xml` for **BungeeTickets** and **TicketsHelper**. 
+The maven-resources-plugin copies the packaged jars to a server's plugins directory for easy testing.
+
 Run `mvn clean package` for the root TicketsPlugin folder. This will build and package all plugins.
