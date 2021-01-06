@@ -33,7 +33,7 @@ public class TicketAdminCommand extends BaseCommand {
             if (ticketOwner != null && ticketOwner.isConnected()) {
                 ticketOwner.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy()));
             } else {
-                // Add to notifications
+                // Add to notifications TODO: create notification no matter what, and send messagebuilder.notification either way
                 Notification notification = new Notification();
                 notification.setTicketId(ticket.getID());
                 notification.setMessage("Your ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy());
@@ -146,7 +146,7 @@ public class TicketAdminCommand extends BaseCommand {
             if (tickets.isEmpty()) {
                 sender.sendMessage(MessageBuilder.info("No tickets found"));
             } else {
-                sender.sendMessage(MessageBuilder.ticketSummary(tickets, true));
+                sender.sendMessage(MessageBuilder.ticketList(tickets, true));
             }
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));

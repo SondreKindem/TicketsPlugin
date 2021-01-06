@@ -12,9 +12,25 @@ import java.util.Date;
 import java.util.List;
 
 public class MessageBuilder {
-    public static String prefix = "§r[§6Tickets§r] ";
+    public static String prefix = "§7[§6Tickets§7] §r";
     public static String separator = "§b----------------------------------";
     public static String header = "§b------------- " + prefix + "§b-------------";
+
+    public static TextComponent adminPrefix = button(prefix, "§6View all open tickets", "/ta list");
+
+    public static TextComponent userPrefix = button(prefix, "§6View your open tickets", "/ticket list");
+
+    public static BaseComponent[] adminHeader = new ComponentBuilder("§b------------- ")
+            .append(adminPrefix)
+            .append(button("", "", ""))
+            .append("§b-------------")
+            .create();
+
+    public static BaseComponent[] userHeader = new ComponentBuilder("§b------------- ")
+            .append(userPrefix)
+            .append(button("", "", ""))
+            .append("§b-------------")
+            .create();
 
     public static TextComponent info(String message) {
         return new TextComponent(prefix + message);
@@ -25,11 +41,10 @@ public class MessageBuilder {
     }
 
     public static BaseComponent[] ticket(Ticket ticket, boolean sentByAdmin) {
-
         String commentsCommand = sentByAdmin ? "/ta comments " + ticket.getID() : "/ticket comments " + ticket.getID();
-        TextComponent commentsLink = createClickableText(" §b[§eView comments§b]", "§6View comments", commentsCommand);
+        TextComponent commentsLink = button("    §7[§eView comments§7]", "§6View comments", commentsCommand);
 
-        ComponentBuilder ticketBuilder = new ComponentBuilder(header)
+        ComponentBuilder ticketBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
                 .append("\n§e§l- §bBy: §e" + ticket.getPlayerName())
                 .append("\n§e§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
@@ -37,7 +52,8 @@ public class MessageBuilder {
                 .append("\n§e§l- §bSubject: §a" + ticket.getDescription())
                 .append("\n§e§l- §bCreated: §a" + Date.from(ticket.getCreated().toInstant()).toString());
 
-        if(ticket.getComments() == null || ticket.getComments().isEmpty()) {
+        // Comments
+        if (ticket.getComments() == null || ticket.getComments().isEmpty()) {
             ticketBuilder.append("\n§e§l- §bComments: §a0");
         } else {
             ticketBuilder.append("\n§e§l- §bComments: §a" + ticket.getComments().size()).append(commentsLink);
@@ -46,14 +62,40 @@ public class MessageBuilder {
         ticketBuilder.append("\n" + separator)
                 .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
 
+        // Add bottom menu buttons
+        if (sentByAdmin) {
+            ticketBuilder.append("\n");
+            if (ticket.isClosed()) {
+                ticketBuilder.append(button(" §7[§areopen§7] ", "Reopen ticket", "/ta reopen " + ticket.getID()));
+            } else {
+                ticketBuilder.append(button(" §7[§cclose§7] ", "Close ticket", "/ta close " + ticket.getID()))
+                        .append(" §7[§ecomment§7] ")
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ta comment add " + ticket.getID() + " "))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Add a comment")));
+            }
+            ticketBuilder.append("\n" + separator)
+                    .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+        } else {
+            ticketBuilder.append("\n");
+            if (!ticket.isClosed()) {
+                ticketBuilder.append(button(" §7[§cclose§7] ", "Close ticket", "/ticket close " + ticket.getID()))
+                        .append(" §7[§ecomment§7] ")
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ticket comment add " + ticket.getID() + " "))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Add a comment")));
+
+                ticketBuilder.append("\n" + separator)
+                        .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+            }
+        }
+
         return ticketBuilder.create();
     }
 
-    public static BaseComponent[] ticketSummary(List<Ticket> tickets, boolean sentByAdmin) {
-        ComponentBuilder componentBuilder = new ComponentBuilder(header);
+    public static BaseComponent[] ticketList(List<Ticket> tickets, boolean sentByAdmin) {
+        ComponentBuilder componentBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader);
         for (Ticket ticket : tickets) {
-            String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
-            TextComponent detailsLink = createClickableText("§b[§edetails§b]", "§6Show more details", infoCommand);
+            String infoCommand = (sentByAdmin ? "/ta info " : "/ticket info ") + ticket.getID();
+            TextComponent detailsLink = button("§b[§edetails§b]", "§6Show more details", infoCommand);
 
             componentBuilder
                     .append("\n§bTicket No. §a" + ticket.getID()).append(" §b(" + (ticket.isClosed() ? "§cclosed" : "§aopen") + "§b)").append("            ").append(detailsLink)
@@ -67,9 +109,9 @@ public class MessageBuilder {
 
     public static BaseComponent[] comments(Ticket ticket, boolean sentByAdmin) {
         String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
-        TextComponent infoLink = createClickableText(" §b[§eview ticket§b]", "§6See ticket details", infoCommand);
+        TextComponent infoLink = button(" §b[§eview ticket§b]", "§6See ticket details", infoCommand);
 
-        ComponentBuilder componentBuilder = new ComponentBuilder(header)
+        ComponentBuilder componentBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bComments for ticket §a" + ticket.getID()).append(infoLink)
                 .append("\n§e§l- §bSubject: §a" + ticket.getDescription())
                 .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click;
@@ -86,11 +128,11 @@ public class MessageBuilder {
 
     public static BaseComponent[] notification(Notification notification, boolean sentByAdmin) {
         String infoCommand = sentByAdmin ? "/ta info " + notification.getTicketId() : "/ticket info " + notification.getTicketId();
-        TextComponent infoLink = createClickableText(" §b[§eticket§b]", "§6See ticket details", infoCommand);
-        return new ComponentBuilder(prefix).append(notification.getMessage()).append(infoLink).create();
+        TextComponent infoLink = button(" §7[§eticket§7]", "§6See ticket details", infoCommand);
+        return new ComponentBuilder(sentByAdmin ? adminPrefix : userPrefix).append(notification.getMessage()).append(infoLink).create();
     }
 
-    private static TextComponent createClickableText(String text, String hoverText, String command) {
+    private static TextComponent button(String text, String hoverText, String command) {
         TextComponent clickableText = new TextComponent(text);
         clickableText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverText)));
         clickableText.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));

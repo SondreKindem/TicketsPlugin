@@ -8,7 +8,6 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.bungeetickets.MessageBuilder;
-import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
@@ -19,6 +18,7 @@ import java.util.UUID;
 
 @CommandAlias("ticket")
 public class TicketCommand extends BaseCommand {
+    // TODO: add ticket close
 
     @Subcommand("create")
     @Syntax("<description>")
@@ -55,7 +55,7 @@ public class TicketCommand extends BaseCommand {
             if (tickets.isEmpty()) {
                 player.sendMessage(MessageBuilder.info("You have no tickets :)"));
             } else {
-                player.sendMessage(MessageBuilder.ticketSummary(tickets, false));
+                player.sendMessage(MessageBuilder.ticketList(tickets, false));
             }
 
         } catch (TicketException e) {
@@ -89,7 +89,7 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("comment add")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
-    @CommandCompletion("@allTicketsForPlayer <message>")
+    @CommandCompletion("@allTicketsForPlayer <message>")  // TODO: only show player's open tickets
     public static void addComment(ProxiedPlayer player, @Values("@allTicketsForPlayer") Integer id, String message) {
         try {
             Comment comment = new Comment();
