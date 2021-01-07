@@ -130,7 +130,10 @@ public class MessageBuilder {
     public static BaseComponent[] notification(Notification notification, boolean sentByAdmin) {
         String infoCommand = sentByAdmin ? "/ta info " + notification.getTicketId() : "/ticket info " + notification.getTicketId();
         TextComponent infoLink = button(" §7[§eticket§7]", "§6See ticket details", infoCommand);
-        return new ComponentBuilder(sentByAdmin ? adminPrefix : userPrefix).append(notification.getMessage()).append(infoLink).create();
+        return new ComponentBuilder(sentByAdmin ? adminPrefix : userPrefix)
+                .append(notification.getMessage())
+                .event((ClickEvent) null).event((HoverEvent) null)
+                .append(infoLink).create();
     }
 
     private static TextComponent button(String text, String hoverText, String command) {
