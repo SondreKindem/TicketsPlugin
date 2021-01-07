@@ -8,12 +8,14 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PluginMessager implements Listener {
@@ -40,7 +42,14 @@ public class PluginMessager implements Listener {
         // Send the request
         player.getServer().getInfo().sendData("BungeeCord", out.toByteArray());
 
-        // TODO: create a timeout for when no location is returned
+        ProxyServer.getInstance().getScheduler().schedule(BungeeTickets.getInstance(), () -> {
+            Ticket ticket = BungeeTickets.getInstance().waitingTickets.remove(ticketKey);
+            if(ticket != null){
+                player.sendMessage(MessageBuilder.error("Did not receive player location from server. Creating ticket without location"));
+                ProxyServer.getInstance().getLogger().severe("Did not receive player location from server. Creating ticket without location");
+                createTicket(ticket);
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -127,36 +136,38 @@ public class PluginMessager implements Listener {
             String world = in.readUTF();
 
             if (event.getReceiver() instanceof ProxiedPlayer) {
-                Ticket ticket = BungeeTickets.getInstance().waitingTickets.get(ticketID);
+                Ticket ticket = BungeeTickets.getInstance().waitingTickets.remove(ticketID);
 
                 if (ticket != null) {
                     ticket.setX(x);
                     ticket.setY(y);
                     ticket.setZ(z);
                     ticket.setWorld(world);
-                    BungeeTickets.getInstance().waitingTickets.remove(ticketID);
 
-                    ProxiedPlayer receiver = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
-
-                    try {
-                        Ticket createdTicket = BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
-
-                        // do things
-                        receiver.sendMessage(MessageBuilder.info("Created ticket!"));
-                        receiver.sendMessage(MessageBuilder.ticket(createdTicket, false));
-
-                        // Notify admins
-                        Notification notification = new Notification();
-                        notification.setTicketId(createdTicket.getID());
-                        notification.setMessage(createdTicket.getPlayerName() + " opened a new ticket with id §a" + createdTicket.getID());
-                        notification.setRecipientUUID(createdTicket.getPlayerUUID());
-                        BungeeTickets.getInstance().notifyAdmins(notification);
-
-                    } catch (TicketException e) {
-                        receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
-                    }
+                    createTicket(ticket);
                 }
             }
+        }
+    }
+
+    public void createTicket(Ticket ticket) {
+        ProxiedPlayer receiver = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+        try {
+            Ticket createdTicket = BungeeTickets.getInstance().getTicketsCore().getTicketController().createTicket(ticket);
+
+            // do things
+            receiver.sendMessage(MessageBuilder.info("Created ticket!"));
+            receiver.sendMessage(MessageBuilder.ticket(createdTicket, false));
+
+            // Notify admins
+            Notification notification = new Notification();
+            notification.setTicketId(createdTicket.getID());
+            notification.setMessage(createdTicket.getPlayerName() + " opened a new ticket with id §a" + createdTicket.getID());
+            notification.setRecipientUUID(createdTicket.getPlayerUUID());
+            BungeeTickets.getInstance().notifyAdmins(notification);
+
+        } catch (TicketException e) {
+            receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
         }
     }
 }
