@@ -21,17 +21,13 @@ public class MessageBuilder {
 
     public static TextComponent userPrefix = button(prefix, "§6View your open tickets", "/ticket list");
 
-    public static BaseComponent[] adminHeader = new ComponentBuilder("§b------------- ")
+    public static ComponentBuilder adminHeader = new ComponentBuilder("§b------------- ")
             .append(adminPrefix)
-            .append(button("", "", ""))
-            .append("§b-------------")
-            .create();
+            .append("§b-------------", ComponentBuilder.FormatRetention.NONE);
 
-    public static BaseComponent[] userHeader = new ComponentBuilder("§b------------- ")
+    public static ComponentBuilder userHeader = new ComponentBuilder("§b------------- ")
             .append(userPrefix)
-            .append(button("", "", ""))
-            .append("§b-------------")
-            .create();
+            .append("§b-------------", ComponentBuilder.FormatRetention.NONE);
 
     public static TextComponent info(String message) {
         return new TextComponent(prefix + message);
@@ -45,7 +41,7 @@ public class MessageBuilder {
         String commentsCommand = sentByAdmin ? "/ta comments " + ticket.getID() : "/ticket comments " + ticket.getID();
         TextComponent commentsLink = button("    §7[§eView comments§7]", "§6View comments", commentsCommand);
 
-        ComponentBuilder ticketBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader)
+        ComponentBuilder ticketBuilder = (sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
                 .append("\n§e§l- §bBy: §e" + ticket.getPlayerName())
                 .append("\n§e§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
@@ -60,8 +56,7 @@ public class MessageBuilder {
             ticketBuilder.append("\n§e§l- §bComments: §a" + ticket.getComments().size()).append(commentsLink);
         }
 
-        ticketBuilder.append("\n" + separator)
-                .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+        ticketBuilder.append("\n" + separator, ComponentBuilder.FormatRetention.NONE);
 
         // Add bottom menu buttons
         if (sentByAdmin) {
@@ -74,8 +69,7 @@ public class MessageBuilder {
                         .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ta comment add " + ticket.getID() + " "))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Add a comment")));
             }
-            ticketBuilder.append("\n" + separator)
-                    .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+            ticketBuilder.append("\n" + separator, ComponentBuilder.FormatRetention.NONE);
         } else {
             ticketBuilder.append("\n");
             if (!ticket.isClosed()) {
@@ -84,8 +78,7 @@ public class MessageBuilder {
                         .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ticket comment add " + ticket.getID() + " "))
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Add a comment")));
 
-                ticketBuilder.append("\n" + separator)
-                        .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click
+                ticketBuilder.append("\n" + separator, ComponentBuilder.FormatRetention.NONE);
             }
         }
 
@@ -93,15 +86,14 @@ public class MessageBuilder {
     }
 
     public static BaseComponent[] ticketList(List<Ticket> tickets, boolean sentByAdmin) {
-        ComponentBuilder componentBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader);
+        ComponentBuilder componentBuilder = sentByAdmin ? adminHeader : userHeader;
         for (Ticket ticket : tickets) {
             String infoCommand = (sentByAdmin ? "/ta info " : "/ticket info ") + ticket.getID();
             TextComponent detailsLink = button("§b[§edetails§b]", "§6Show more details", infoCommand);
 
             componentBuilder
                     .append("\n§bTicket No. §a" + ticket.getID()).append(" §b(" + (ticket.isClosed() ? "§cclosed" : "§aopen") + "§b)").append("            ").append(detailsLink)
-                    .append("\n§bSubject: §a" + ticket.getDescription())
-                    .event((ClickEvent) null).event((HoverEvent) null)  // Clear the hover & click
+                    .append("\n§bSubject: §a" + ticket.getDescription(), ComponentBuilder.FormatRetention.NONE)
                     .append("\n§bBy §a" + ticket.getPlayerName() + " §bon §a" + ticket.getServerName())
                     .append("\n" + separator);
         }
@@ -112,10 +104,9 @@ public class MessageBuilder {
         String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
         TextComponent infoLink = button(" §b[§eview ticket§b]", "§6See ticket details", infoCommand);
 
-        ComponentBuilder componentBuilder = new ComponentBuilder().append(sentByAdmin ? adminHeader : userHeader)
+        ComponentBuilder componentBuilder = (sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bComments for ticket §a" + ticket.getID()).append(infoLink)
-                .append("\n§e§l- §bSubject: §a" + ticket.getDescription())
-                .event((ClickEvent) null).event((HoverEvent) null);  // Clear the hover & click;
+                .append("\n§e§l- §bSubject: §a" + ticket.getDescription(), ComponentBuilder.FormatRetention.NONE);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MMM-hh:mm");
         for (Comment comment : ticket.getComments()) {
@@ -131,8 +122,7 @@ public class MessageBuilder {
         String infoCommand = sentByAdmin ? "/ta info " + notification.getTicketId() : "/ticket info " + notification.getTicketId();
         TextComponent infoLink = button(" §7[§eticket§7]", "§6See ticket details", infoCommand);
         return new ComponentBuilder(sentByAdmin ? adminPrefix : userPrefix)
-                .append(notification.getMessage())
-                .event((ClickEvent) null).event((HoverEvent) null)
+                .append(notification.getMessage(), ComponentBuilder.FormatRetention.NONE)
                 .append(infoLink).create();
     }
 
