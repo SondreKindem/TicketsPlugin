@@ -27,8 +27,6 @@ public class TicketAdminCommand extends BaseCommand {
     public static void close(CommandSender sender, Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
-            sender.sendMessage(MessageBuilder.info("Ticket closed"));
-
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
 
             Notification notification = new Notification();
@@ -63,8 +61,6 @@ public class TicketAdminCommand extends BaseCommand {
     public static void reopen(CommandSender sender, Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().reopenTicket(id, sender.getName());
-            sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas reopened."));
-
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
 
             Notification notification = new Notification();
@@ -80,7 +76,7 @@ public class TicketAdminCommand extends BaseCommand {
             }
 
             // Notify other admins
-            notification.setMessage("Ticket §a" + id + " §rwas reopened by " + ticket.getClosedBy());
+            notification.setMessage("Ticket §a" + id + " §rwas reopened by " + sender.getName());
             BungeeTickets.getInstance().notifyAdmins(notification);
 
         } catch (TicketException e) {
