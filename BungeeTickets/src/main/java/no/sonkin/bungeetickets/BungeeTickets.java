@@ -16,6 +16,7 @@ import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.bungeetickets.listeners.EventListener;
 import no.sonkin.ticketscore.TicketsCore;
 import no.sonkin.ticketscore.exceptions.TicketException;
+import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
@@ -133,6 +134,15 @@ public class BungeeTickets extends Plugin {
             }
         });
 
+        manager.getCommandCompletions().registerCompletion("openTicketsForPlayer", c -> {
+            try {
+                return ticketsCore.getTicketController().getTicketsByPlayer(c.getPlayer().getUniqueId(), false)
+                        .stream().map(t -> String.valueOf(t.getID())).collect(Collectors.toList());
+            } catch (TicketException e) {
+                return ImmutableList.of("");
+            }
+        });
+
         manager.getCommandCompletions().registerCompletion("openTicketsFilter", c -> {
             // Handle filtering of open tickets. I.e. limit by player name = p:<player>
             try {
@@ -190,6 +200,15 @@ public class BungeeTickets extends Plugin {
         } catch (IOException e) {
             getLogger().severe("Error while trying to load the config!");
             throw new RuntimeException("Could not load the config!", e);
+        }
+    }
+
+    public void notifyAdmins(Notification notification) {
+        // Notify admins
+        for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
+            if (onlinePlayer.hasPermission("tickets.admin")) {
+                onlinePlayer.sendMessage(MessageBuilder.notification(notification, true));
+            }
         }
     }
 

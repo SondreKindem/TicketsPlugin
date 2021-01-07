@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
 import no.sonkin.bungeetickets.MessageBuilder;
+import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
@@ -18,7 +19,6 @@ import java.util.UUID;
 
 @CommandAlias("ticket")
 public class TicketCommand extends BaseCommand {
-    // TODO: add ticket close
 
     @Subcommand("create")
     @Syntax("<description>")
@@ -40,6 +40,30 @@ public class TicketCommand extends BaseCommand {
 
         // Send a request to add location to the ticket
         BungeeTickets.getInstance().getPluginMessager().requestLocation(player, randomID);
+    }
+
+    @Subcommand("close")
+    @Syntax("<id>")
+    @CommandCompletion("@openTicketsForPlayer")
+    @Description("Close a ticket")
+    public static void close(ProxiedPlayer sender, @Values("@openTicketsForPlayer") Integer id) {
+        try {
+            Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
+            sender.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed."));
+
+            Notification notification = new Notification();
+            notification.setTicketId(ticket.getID());
+            notification.setMessage("The ticket with id §a" + id + " §rwas closed by " + ticket.getClosedBy());
+            notification.setRecipientUUID(ticket.getPlayerUUID());
+
+            // Notify admins
+            BungeeTickets.getInstance().notifyAdmins(notification);
+
+        } catch (TicketException e) {
+            sender.sendMessage(MessageBuilder.error("Could not close ticket! Reason:\n" + e.getMessage()));
+        } catch (NumberFormatException e) {
+            sender.sendMessage(MessageBuilder.error("Not a valid ID"));
+        }
     }
 
     @Subcommand("list")
@@ -89,7 +113,7 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("comment add")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
-    @CommandCompletion("@allTicketsForPlayer <message>")  // TODO: only show player's open tickets
+    @CommandCompletion("@openTicketsForPlayer <message>")
     public static void addComment(ProxiedPlayer player, @Values("@allTicketsForPlayer") Integer id, String message) {
         try {
             Comment comment = new Comment();
@@ -103,15 +127,11 @@ public class TicketCommand extends BaseCommand {
             // Set up a notification
             Notification notification = new Notification();
             notification.setRecipientUUID(ticket.getPlayerUUID());
-            notification.setMessage("§a" + comment.getPlayerName() + " §rcommented §a" + comment.getMessage());
+            notification.setMessage("§a" + ticket.getID() + "§r: §e" + comment.getPlayerName() + " §rcommented §a" + comment.getMessage());
             notification.setTicketId(ticket.getID());
 
             // Notify admins
-            for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
-                if (onlinePlayer.hasPermission("tickets.admin")) {
-                    onlinePlayer.sendMessage(MessageBuilder.notification(notification, true));
-                }
-            }
+            BungeeTickets.getInstance().notifyAdmins(notification);
 
         } catch (TicketException e) {
             player.sendMessage(MessageBuilder.error(e.getMessage()));

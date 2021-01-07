@@ -13,6 +13,7 @@ import java.util.List;
 
 public class MessageBuilder {
     public static String prefix = "§7[§6Tickets§7] §r";
+    // TODO: use a better color for separators
     public static String separator = "§b----------------------------------";
     public static String header = "§b------------- " + prefix + "§b-------------";
 

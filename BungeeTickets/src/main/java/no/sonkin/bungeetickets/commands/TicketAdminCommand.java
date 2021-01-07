@@ -27,7 +27,7 @@ public class TicketAdminCommand extends BaseCommand {
     public static void close(CommandSender sender, Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
-            sender.sendMessage(MessageBuilder.info("The ticket with id §a" + id + " §rwas closed."));
+            sender.sendMessage(MessageBuilder.info("Ticket closed"));
 
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
 
@@ -42,6 +42,10 @@ public class TicketAdminCommand extends BaseCommand {
                 // Add to notifications
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
+
+            // Notify other admins
+            notification.setMessage("Ticket §a" + id + " §rwas closed by " + ticket.getClosedBy());
+            BungeeTickets.getInstance().notifyAdmins(notification);
 
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error("Could not close ticket! Reason:\n" + e.getMessage()));
@@ -74,6 +78,10 @@ public class TicketAdminCommand extends BaseCommand {
                 // Add to notifications
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
+
+            // Notify other admins
+            notification.setMessage("Ticket §a" + id + " §rwas reopened by " + ticket.getClosedBy());
+            BungeeTickets.getInstance().notifyAdmins(notification);
 
         } catch (TicketException e) {
             sender.sendMessage(MessageBuilder.error("Could not reopen ticket! Reason:\n" + e.getMessage()));
@@ -194,7 +202,7 @@ public class TicketAdminCommand extends BaseCommand {
 
             Notification notification = new Notification();
             notification.setRecipientUUID(ticket.getPlayerUUID());
-            notification.setMessage("§a" + comment.getPlayerName() + " §rcommented §a" + comment.getMessage());
+            notification.setMessage("§a" + ticket.getID() + "§r: §e" + comment.getPlayerName() + " §rcommented §a" + comment.getMessage());
             notification.setTicketId(ticket.getID());
 
             if (ticketOwner != null && ticketOwner.isConnected()) {
@@ -203,6 +211,8 @@ public class TicketAdminCommand extends BaseCommand {
                 // Ticket owner is offline
                 BungeeTickets.getInstance().getTicketsCore().getNotificationController().create(notification);
             }
+
+            BungeeTickets.getInstance().notifyAdmins(notification);
 
         } catch (TicketException e) {
             player.sendMessage(MessageBuilder.error(e.getMessage()));

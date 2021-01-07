@@ -10,6 +10,7 @@ import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import no.sonkin.ticketscore.exceptions.TicketException;
+import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.util.Collection;
@@ -143,6 +144,13 @@ public class PluginMessager implements Listener {
                         // do things
                         receiver.sendMessage(MessageBuilder.info("Created ticket!"));
                         receiver.sendMessage(MessageBuilder.ticket(createdTicket, false));
+
+                        // Notify admins
+                        Notification notification = new Notification();
+                        notification.setTicketId(createdTicket.getID());
+                        notification.setMessage(createdTicket.getPlayerName() + " opened a new ticket with id §a" + createdTicket.getID());
+                        notification.setRecipientUUID(createdTicket.getPlayerUUID());
+                        BungeeTickets.getInstance().notifyAdmins(notification);
 
                     } catch (TicketException e) {
                         receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));

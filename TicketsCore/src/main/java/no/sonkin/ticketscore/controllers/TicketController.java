@@ -68,7 +68,6 @@ public class TicketController {
         try {
             Ticket ticket = ticketDao.queryForId(id);
             if (ticket != null) {
-                // TODO: add a comment saying who opened it
                 ticket.open();
                 ticket.setClosedBy(null);
                 ticketDao.update(ticket);
