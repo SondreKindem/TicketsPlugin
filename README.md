@@ -10,6 +10,7 @@
 ### TODO
 * Make helper plugin optional (resulting in reduced functionality)
 * Add support for more databases
+* Permission to administrate tickets only on specific servers
 
 ## Build
 
