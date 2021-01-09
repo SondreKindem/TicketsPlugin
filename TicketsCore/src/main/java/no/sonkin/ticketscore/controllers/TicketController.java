@@ -213,7 +213,7 @@ public class TicketController {
 
     public List<Ticket> getFilteredTickets(HashMap<String, Object> filter) throws TicketException {
         try {
-            return ticketDao.queryForFieldValuesArgs(filter);
+            return ticketDao.queryForFieldValues(filter);
         } catch (SQLException ex) {
             throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
         }
