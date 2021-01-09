@@ -41,7 +41,7 @@ public class MessageBuilder {
         String commentsCommand = sentByAdmin ? "/ta comments " + ticket.getID() : "/ticket comments " + ticket.getID();
         TextComponent commentsLink = button("    §7[§eView comments§7]", "§6View comments", commentsCommand);
 
-        ComponentBuilder ticketBuilder = (sentByAdmin ? adminHeader : userHeader)
+        ComponentBuilder ticketBuilder = new ComponentBuilder(sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bDisplaying ticket No. §a" + ticket.getID())
                 .append("\n§e§l- §bBy: §e" + ticket.getPlayerName())
                 .append("\n§e§l- §bOn §a" + ticket.getServerName() + " §bin §a" + ticket.getWorld())
@@ -86,7 +86,7 @@ public class MessageBuilder {
     }
 
     public static BaseComponent[] ticketList(List<Ticket> tickets, boolean sentByAdmin) {
-        ComponentBuilder componentBuilder = sentByAdmin ? adminHeader : userHeader;
+        ComponentBuilder componentBuilder = new ComponentBuilder(sentByAdmin ? adminHeader : userHeader);
         for (Ticket ticket : tickets) {
             String infoCommand = (sentByAdmin ? "/ta info " : "/ticket info ") + ticket.getID();
             TextComponent detailsLink = button("§b[§edetails§b]", "§6Show more details", infoCommand);
@@ -104,7 +104,7 @@ public class MessageBuilder {
         String infoCommand = sentByAdmin ? "/ta info " + ticket.getID() : "/ticket info " + ticket.getID();
         TextComponent infoLink = button(" §b[§eview ticket§b]", "§6See ticket details", infoCommand);
 
-        ComponentBuilder componentBuilder = (sentByAdmin ? adminHeader : userHeader)
+        ComponentBuilder componentBuilder = new ComponentBuilder(sentByAdmin ? adminHeader : userHeader)
                 .append("\n§bComments for ticket §a" + ticket.getID()).append(infoLink)
                 .append("\n§e§l- §bSubject: §a" + ticket.getDescription(), ComponentBuilder.FormatRetention.NONE);
 
