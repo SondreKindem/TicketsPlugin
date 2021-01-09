@@ -21,6 +21,7 @@ import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -143,13 +144,15 @@ public class BungeeTickets extends Plugin {
             }
         });
 
-        manager.getCommandCompletions().registerCompletion("openTicketsFilter", c -> {
+        manager.getCommandCompletions().registerCompletion("filtering", c -> {
             // Handle filtering of open tickets. I.e. limit by player name = p:<player>
             try {
                 if (c.getInput().equals("p:")) {
                     return ticketsCore.getTicketController().getPlayersWithOpenTickets().stream().map(ticket -> "p:" + ticket.getPlayerName()).collect(Collectors.toList());
+                } else if (c.getInput().equals("s:")) {
+                    return ImmutableList.of("s:open", "s:closed", "s:all");
                 }
-                return ImmutableList.of("p:");
+                return ImmutableList.of("p:", "s:");
             } catch (TicketException e) {
                 getLogger().severe(e.getMessage());
                 return ImmutableList.of("");

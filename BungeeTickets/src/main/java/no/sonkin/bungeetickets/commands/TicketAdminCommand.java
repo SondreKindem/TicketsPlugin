@@ -14,6 +14,8 @@ import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @CommandAlias("ticketadmin|ta")
@@ -121,45 +123,74 @@ public class TicketAdminCommand extends BaseCommand {
 
     @Subcommand("list")
     @Syntax("<filter> = p:<player>, s:<open|closed>")
-    @CommandCompletion("@openTicketsFilter")
-    @Description("List tickets. Can filter by player and open/closed")
-    // TODO: add option to see only open, closed or all
-    public static void list(ProxiedPlayer sender, @Optional @Single String filter) {
+    @CommandCompletion("@filtering")
+    @Description("List tickets. Can filter by player and open/closed. If no filter, show all open tickets")
+    // TODO: paginate
+    public static void list(ProxiedPlayer sender, @Optional String[] filters) {
         try {
             List<Ticket> tickets;
+            boolean allStatus = false;
 
-            // Handle filtering
-            if (filter != null) {
-                String[] filterList = filter.split(":");
+            // Handle filtering. Kinda convoluted, probably improve
+            if (filters != null && filters.length > 0) {
+                HashMap<String, Object> queryFilter = new HashMap<>();
+                for (String filter : filters) {
+                    String[] filterSplit = filter.split(":");
 
-                if (filterList.length != 2) {
-                    throw new TicketException("No filter argument");
-                }
-
-                if (filterList[0].equals("p")) {
-                    String playerName = filterList[1];
-                    if (playerName.length() <= 3) {
-                        throw new TicketException("Not a valid player name");
+                    if (filterSplit.length != 2) {
+                        throw new TicketException("No filter argument: " + filter);
                     }
-                    tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketsByPlayer(playerName, false);
-                } else {
-                    // If this filter has not been handled
-                    throw new TicketException("Not a valid filter");
+
+                    if (filterSplit[0].equals("p")) {
+                        String playerName = filterSplit[1];
+                        if (playerName.length() <= 3) {
+                            throw new TicketException("Not a valid player name: " + playerName);
+                        }
+                        queryFilter.put("playerName", playerName);
+                    } else if (filterSplit[0].equals("s")) {
+                        String status = filterSplit[1];
+                        // If all, don't add any filter
+                        switch (status) {
+                            case "open":
+                                queryFilter.put("closed", false);
+                                break;
+                            case "closed":
+                                queryFilter.put("closed", true);
+                                break;
+                            case "all":
+                                allStatus = true;
+                                break;
+                            default:
+                                throw new TicketException("Not a valid status: " + status);
+                        }
+                    } else {
+                        // If this filter has not been handled
+                        throw new TicketException("Not a valid filter");
+                    }
                 }
 
+                if(queryFilter.isEmpty() && allStatus) {  // all status with no other filters
+                    tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getAllTickets();
+                } else {
+                    tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getFilteredTickets(queryFilter);
+                }
             } else {
                 // return all
                 tickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getOpenTickets();
             }
+
+            ProxyServer.getInstance().getLogger().severe(tickets.toString());
 
             if (tickets.isEmpty()) {
                 sender.sendMessage(MessageBuilder.info("No tickets found"));
             } else {
                 sender.sendMessage(MessageBuilder.ticketList(tickets, true));
             }
-        } catch (TicketException e) {
+        } catch (
+                TicketException e) {
             sender.sendMessage(MessageBuilder.error(e.getMessage()));
         }
+
     }
 
     @Subcommand("info")
@@ -222,7 +253,7 @@ public class TicketAdminCommand extends BaseCommand {
     public static void comments(ProxiedPlayer player, @Values("@allTickets") Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().getTicketById(id);
-            if(ticket != null) {
+            if (ticket != null) {
                 player.sendMessage(MessageBuilder.comments(ticket, true));
             } else {
                 player.sendMessage(MessageBuilder.error("Could not find a ticket with id §a" + id));

@@ -1,14 +1,15 @@
 package no.sonkin.ticketscore.controllers;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TicketController {
 
@@ -210,6 +211,14 @@ public class TicketController {
         }
     }
 
+    public List<Ticket> getFilteredTickets(HashMap<String, Object> filter) throws TicketException {
+        try {
+            return ticketDao.queryForFieldValuesArgs(filter);
+        } catch (SQLException ex) {
+            throw new TicketException("Encountered sql error while fetching tickets: " + ex.getMessage());
+        }
+    }
+
     public List<Ticket> getPlayersWithOpenTickets() throws TicketException {
         try {
             return ticketDao.queryBuilder().selectColumns("playerName").distinct().where().eq("closed", false).query();
@@ -223,7 +232,7 @@ public class TicketController {
         try {
             Ticket ticket = ticketDao.queryForId(ticketID);
 
-            if(ticket.isClosed()) {
+            if (ticket.isClosed()) {
                 throw new TicketException("Could not add comment: ticket §a" + ticketID + " §ris closed");
             }
 
