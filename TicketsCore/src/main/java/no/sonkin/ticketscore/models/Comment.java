@@ -12,7 +12,7 @@ public class Comment {
     private Integer ID;
     @DatabaseField(canBeNull = false)
     private String message;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField
     private UUID playerUUID;
     @DatabaseField(canBeNull = false)
     private String playerName;
