@@ -14,6 +14,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.bungeetickets.listeners.EventListener;
+import no.sonkin.ticketscore.SocketsClient;
 import no.sonkin.ticketscore.TicketsCore;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Notification;
@@ -35,6 +36,7 @@ public class BungeeTickets extends Plugin {
     private Configuration config;
     private PluginMessager pluginMessager;
     private TicketsCore ticketsCore;
+    private SocketsClient socketsClient;
 
     public HashMap<String, Ticket> waitingTickets = new HashMap<>();
 
@@ -61,6 +63,10 @@ public class BungeeTickets extends Plugin {
         getProxy().getPluginManager().registerListener(this, pluginMessager);
         getProxy().getPluginManager().registerListener(this, new EventListener());
 
+        // SET UP SOCKETS
+
+        socketsClient = new SocketsClient();
+
         try {
 
             // SET UP TICKETS CORE
@@ -68,7 +74,7 @@ public class BungeeTickets extends Plugin {
             ticketsCore = new TicketsCore(getDataFolder(), config.getString("database"));
 
             int frequency = config.contains("notify-frequency") ? config.getInt("notify-frequency") : 10;
-            if(frequency > 0) {
+            if (frequency > 0) {
                 ProxyServer.getInstance().getScheduler().schedule(this, new Runnable() {
                     @Override
                     public void run() {
@@ -221,6 +227,10 @@ public class BungeeTickets extends Plugin {
 
     public PluginMessager getPluginMessager() {
         return pluginMessager;
+    }
+
+    public SocketsClient getSocketsClient() {
+        return socketsClient;
     }
 
     public Configuration getConfig() {

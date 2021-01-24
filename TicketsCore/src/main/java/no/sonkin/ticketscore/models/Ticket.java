@@ -4,17 +4,23 @@ import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.jsoniter.annotation.JsonIgnore;
+import com.jsoniter.annotation.JsonUnwrapper;
+import com.jsoniter.output.JsonStream;
 
+import java.io.IOException;
 import java.util.Date;
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @DatabaseTable(tableName = "tickets")
 public class Ticket {
+    @JsonIgnore
     @DatabaseField(generatedId = true)
     private Integer ID;
     @DatabaseField(canBeNull = false)
     private String description;
+    @JsonIgnore
     @DatabaseField(canBeNull = false)
     private UUID playerUUID;
     @DatabaseField(canBeNull = false)
@@ -29,17 +35,43 @@ public class Ticket {
     private Integer y;
     @DatabaseField
     private String world;
+    @JsonIgnore
     @DatabaseField(canBeNull = false)
     private Timestamp created;
+    @JsonIgnore
     @DatabaseField(version = true)
     private Timestamp updated;
     @DatabaseField(canBeNull = false, defaultValue = "false")
     private boolean closed;
     @DatabaseField
     private String closedBy;
+    @DatabaseField
+    private String discordChannel;
+    private String discordUser;
 
+    @JsonIgnore
     @ForeignCollectionField
     ForeignCollection<Comment> comments;
+
+    @JsonUnwrapper
+    public void writeStuff(JsonStream stream) throws IOException {
+        stream.writeObjectField("ticketId");
+        stream.writeVal(ID);
+        stream.writeMore();
+        stream.writeObjectField("created");
+        stream.writeVal(created.toString());
+        stream.writeMore();
+        stream.writeObjectField("updated");
+        stream.writeVal(updated.toString());
+        stream.writeMore();
+        stream.writeObjectField("playerUUID");
+        stream.writeVal(playerUUID.toString());
+    }
+
+
+    public String toJson() {
+        return JsonStream.serialize(this);
+    }
 
     public int getID() {
         return ID;
@@ -57,6 +89,7 @@ public class Ticket {
         this.description = description;
     }
 
+    @JsonIgnore
     public UUID getPlayerUUID() {
         return playerUUID;
     }
@@ -113,6 +146,7 @@ public class Ticket {
         this.world = world;
     }
 
+    @JsonIgnore
     public Date getCreated() {
         return created;
     }
@@ -139,6 +173,14 @@ public class Ticket {
 
     public void setClosedBy(String closedBy) {
         this.closedBy = closedBy;
+    }
+
+    public String getDiscordChannel() {
+        return discordChannel;
+    }
+
+    public void setDiscordChannel(String discordChannel) {
+        this.discordChannel = discordChannel;
     }
 
     public ForeignCollection<Comment> getComments() {

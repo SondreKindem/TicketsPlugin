@@ -145,6 +145,7 @@ public class PluginMessager implements Listener {
                     ticket.setWorld(world);
 
                     createTicket(ticket);
+
                 }
             }
         }
@@ -165,6 +166,7 @@ public class PluginMessager implements Listener {
             notification.setMessage(createdTicket.getPlayerName() + " opened a new ticket with id §a" + createdTicket.getID());
             notification.setRecipientUUID(createdTicket.getPlayerUUID());
             BungeeTickets.getInstance().notifyAdmins(notification);
+            BungeeTickets.getInstance().getSocketsClient().sendTicket(ticket);
 
         } catch (TicketException e) {
             receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
