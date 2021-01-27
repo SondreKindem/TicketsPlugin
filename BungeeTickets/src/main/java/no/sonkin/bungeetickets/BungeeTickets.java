@@ -15,6 +15,7 @@ import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.bungeetickets.listeners.EventListener;
 import no.sonkin.ticketscore.SocketsClient;
+import no.sonkin.ticketscore.SocketsClientHelper;
 import no.sonkin.ticketscore.TicketsCore;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Notification;
@@ -36,9 +37,10 @@ public class BungeeTickets extends Plugin {
     private Configuration config;
     private PluginMessager pluginMessager;
     private TicketsCore ticketsCore;
-    private SocketsClient socketsClient;
+    private SocketsClientHelper socketsClientHelper;
 
     public HashMap<String, Ticket> waitingTickets = new HashMap<>();
+    public boolean socketsEnabled = false;
 
     @Override
     public void onEnable() {
@@ -65,7 +67,11 @@ public class BungeeTickets extends Plugin {
 
         // SET UP SOCKETS
 
-        socketsClient = new SocketsClient();
+        if(config.getBoolean("discord-integration")) {
+            setupSockets();
+        } else {
+            socketsEnabled = false;
+        }
 
         try {
 
@@ -212,6 +218,45 @@ public class BungeeTickets extends Plugin {
         }
     }
 
+
+    public void setupSockets() {
+        if(!config.contains("token")) {
+            getLogger().severe("Could not enable sockets, could not find token in plugin config");
+            return;
+        } else if(!config.contains("guild")) {
+            getLogger().severe("Could not enable sockets, could not find guild in plugin config");
+            return;
+        }
+
+        String token = config.getString("token");
+        String guild = config.getString("guild");
+
+        System.out.println(config.getString("guild"));
+        System.out.println(config.getLong("guild"));
+
+        if(token == null) {
+            if(config.getLong("token") > 0) {
+                token = String.valueOf(config.getLong("token"));
+            } else {
+                getLogger().severe("Could not enable sockets, malformed token. Check the plugin config!");
+                return;
+            }
+        }
+
+        if(guild == null) {
+            if(config.getLong("guild") > 0) {
+                guild = String.valueOf(config.getLong("guild"));
+            } else {
+                getLogger().severe("Could not enable sockets, malformed guild id. Check the plugin config!");
+                return;
+            }
+        }
+
+        // socketsClient = new SocketsClient(token, guild);
+        socketsClientHelper = new SocketsClientHelper(token, guild);
+        socketsEnabled = true;
+    }
+
     public void notifyAdmins(Notification notification) {
         // Notify admins
         for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
@@ -229,8 +274,8 @@ public class BungeeTickets extends Plugin {
         return pluginMessager;
     }
 
-    public SocketsClient getSocketsClient() {
-        return socketsClient;
+    public SocketsClientHelper getSocketsClientHelper() {
+        return socketsClientHelper;
     }
 
     public Configuration getConfig() {

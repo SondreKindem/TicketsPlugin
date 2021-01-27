@@ -47,6 +47,7 @@ public class Ticket {
     private String closedBy;
     @DatabaseField
     private String discordChannel;
+    @DatabaseField
     private String discordUser;
 
     @JsonIgnore

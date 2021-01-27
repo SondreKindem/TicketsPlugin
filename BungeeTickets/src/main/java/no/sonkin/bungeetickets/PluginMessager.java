@@ -44,7 +44,7 @@ public class PluginMessager implements Listener {
 
         ProxyServer.getInstance().getScheduler().schedule(BungeeTickets.getInstance(), () -> {
             Ticket ticket = BungeeTickets.getInstance().waitingTickets.remove(ticketKey);
-            if(ticket != null){
+            if (ticket != null) {
                 player.sendMessage(MessageBuilder.error("Did not receive player location from server. Creating ticket without location"));
                 ProxyServer.getInstance().getLogger().severe("Did not receive player location from server. Creating ticket without location");
                 createTicket(ticket);
@@ -166,10 +166,29 @@ public class PluginMessager implements Listener {
             notification.setMessage(createdTicket.getPlayerName() + " opened a new ticket with id §a" + createdTicket.getID());
             notification.setRecipientUUID(createdTicket.getPlayerUUID());
             BungeeTickets.getInstance().notifyAdmins(notification);
-            BungeeTickets.getInstance().getSocketsClient().sendTicket(ticket);
+
+            sendTicketToDiscord(ticket);
 
         } catch (TicketException e) {
             receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
         }
+    }
+
+    private void sendTicketToDiscord(Ticket ticket) {
+        ProxyServer.getInstance().getScheduler().runAsync(
+                BungeeTickets.getInstance(),
+                () -> {
+                    String channelId = BungeeTickets.getInstance().getSocketsClientHelper().getClient().sendTicket(ticket);
+                    if(channelId != null) {
+                        try {
+                            ticket.setDiscordChannel(channelId);
+                            BungeeTickets.getInstance().getTicketsCore().getTicketController().updateTicket(ticket);
+                        } catch (TicketException e) {
+                            BungeeTickets.getInstance().getLogger().severe("Error while trying to set discord channel for ticket: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 }

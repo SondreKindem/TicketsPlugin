@@ -4,6 +4,10 @@ database: h2
 # How often should the plugin notify about open tickets, in minutes - 0 = never
 notify-frequency: 10
 
-token: ""
 
+
+# Enable discord integration
+# Register the bot with your discord server first, then fill in info here!
+discord-integration: false
+token: ""
 guild: ""

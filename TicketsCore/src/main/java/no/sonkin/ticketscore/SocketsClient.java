@@ -2,14 +2,14 @@ package no.sonkin.ticketscore;
 
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
+import com.jsoniter.output.JsonStream;
 import com.jsoniter.spi.JsonException;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.ByteBuffer;
+import java.util.HashMap;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SocketsClient {
     private Socket clientSocket;
@@ -17,16 +17,19 @@ public class SocketsClient {
     private BufferedReader in;
 
     // 85.166.124.249
-    private String ip = "85.166.124.249";
-    private int port = 1337;
+    private final String ip = "ticketsbot.duckdns.org";
+    private final int port = 1337;
 
-    private String createString = """
+    private final String token;
+    private final String guild;
+
+    private final String createString = """
             {
-                "action": "close",
+                "action": "create",
                 "guild": 692406121020915743,
-                "token": "124asd14voknmo135r",
+                "token": "nN9Br1Yw7pYcvpJztFL1BJiR_gl85yMh",
                 "data": {
-                    "ticketId": 14,
+                    "ticketId": 666,
                     "description": "OMG Jeg trenger hjelp! Newfarm admin abuser!!!1 zomg",
                     "playerName": "Sonk1n",
                     "discordUser": "Sondre",
@@ -38,17 +41,17 @@ public class SocketsClient {
                     "z": 120,
                     "created": 14125123213,
                     "updated": 51652342342,
-                    "closed": true,
+                    "closed": false,
                     "closedBy": "Sondre",
                     "discordChannel": 802958441885990982
                 }
             }
             """;
-    private String commentString = """
+    private final String commentString = """
             {
                 "action": "comment",
                 "guild": 692406121020915743,
-                "token": "124asd14voknmo135r",
+                "token": "nN9Br1Yw7pYcvpJztFL1BJiR_gl85yMh",
                 "data": {
                     "ticketId": 123,
                     "cid": 802929984444301333,
@@ -59,22 +62,41 @@ public class SocketsClient {
                 }
             }
             """;
+    private final String bufferString = """
+            {
+                "action": "buffer",
+                "guild": 692406121020915743,
+                "token": "nN9Br1Yw7pYcvpJztFL1BJiR_gl85yMh",
+                "data": {}
+            }
+            """;
 
-
-    public static void main(String[] args) {
-        SocketsClient client = new SocketsClient();
-        client.startConnection();
-        System.out.println(client.sendAndReceiveMessage(client.createString));
+    public SocketsClient(String token, String guild) {
+        this.token = token;
+        this.guild = guild;
     }
 
-    public void startConnection() {
+    public static void main(String[] args) {
+        SocketsClient client = new SocketsClient("", "692406121020915743");
+        try {
+            client.startConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(client.sendReceiveSend(client.bufferString));
+    }
+
+    public void startConnection() throws IOException {
         try {
             clientSocket = new Socket(this.ip, this.port);
-            clientSocket.setKeepAlive(true);
+            //clientSocket.setKeepAlive(true);
+            clientSocket.setSoTimeout(4000);
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            System.err.println("Could not connect to socket server!");
+            throw new IOException();
         }
     }
 
@@ -83,34 +105,36 @@ public class SocketsClient {
      *
      * @param ticket the new ticket
      */
-    public void sendTicket(Ticket ticket) {
-        String json = """
-                {
-                    "action": "create",
-                    "guild": 692406121020915743,
-                    "token": "124asd14voknmo135r",
-                    "data": """ + ticket.toJson() + """
-                }
-                """;
-        this.startConnection();
-        System.out.println(ticket.toJson());
-        //String response = this.sendAndReceiveMessage(json);
-        String response = sendAndReceiveOnce(json);
-
-        if (response == null) {
-            System.out.println("ERROR! Did not get any response from socket");
-            return;
-        }
-
+    public String sendTicket(Ticket ticket) {
         try {
-            Any obj = JsonIterator.deserialize(response);
-            System.out.println(obj.get("data").get("discordChannel"));
-        } catch (JsonException ex) {
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();
-        }
+            String json = new CommonResponse(guild, token, "create", ticket).toJson();
 
-        stopConnection();
+            System.out.println(json);
+
+            this.startConnection();
+            System.out.println(ticket.toJson());
+            //String response = this.sendAndReceiveMessage(json);
+            String response = sendAndReceiveOnce(json);
+
+            stopConnection();
+
+            if (response == null) {
+                System.out.println("ERROR! Did not get any response from socket");
+                return null;
+            }
+
+            Any obj = JsonIterator.deserialize(response);
+            if(!obj.get("error").toString().equals("") && obj.get("error") != null){
+                System.err.println("Discord bot returned error while trying to send ticket: " + obj.get("error"));
+            }
+
+            return obj.get("data").get("discordChannel").toString();
+        } catch (JsonException | IOException ex) {
+            stopConnection();
+            System.out.println(ex.getMessage());
+            // ex.printStackTrace();
+            return null;
+        }
     }
 
     public String sendAndReceiveOnce(String msg) {
@@ -126,7 +150,8 @@ public class SocketsClient {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.err.println("Error while sending and receiving once on socket: " + e.getMessage());
         }
         return response;
     }
@@ -155,6 +180,39 @@ public class SocketsClient {
             return sb.toString();
 
         } catch (IOException e) {
+            // e.printStackTrace();
+            System.err.println("Error while sending and receiving on socket: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public String sendReceiveSend(String msg) {
+        try {
+            out.println(msg);
+
+            String line;
+            StringBuilder sb = new StringBuilder();
+
+            while ((line = in.readLine()) != null) {
+                if (line.equals("~~/START/~~"))
+                    sb = new StringBuilder();
+                else if (line.equals("~~/END/~~")) {
+                    System.out.println(sb.toString());
+                    sb.delete(0, sb.length());
+                } else {
+                    System.out.println(line);
+                    sb.append(line);
+                    //Any result = JsonIterator.deserialize(line);
+                    //result.get("action").set("bufferDel");
+                    //System.out.println("Sending back");
+                    //System.out.println(result);
+                    out.println("{\"action\": \"bufferDel\", \"guild\": 692406121020915743, \"data\": {\"messageID\": 803711803875393597, \"ticketId\": 61, \"description\": \"this is a reply\", \"discordChannel\": 803711308041945138, \"playerName\": \"newfarm1\", \"created\": \"2021-01-26 20:43:46.232674\", \"closed\": false, \"closedBy\": \"\"}}");
+                }
+            }
+
+            return sb.toString();
+
+        } catch (IOException e) {
             e.printStackTrace();
             return "ERROR";
         }
@@ -169,45 +227,26 @@ public class SocketsClient {
             e.printStackTrace();
         }
     }
-
-    private String readBuff(ByteBuffer myByteBuffer) {
-        if (myByteBuffer.hasArray()) {
-            return new String(myByteBuffer.array(),
-                    myByteBuffer.arrayOffset() + myByteBuffer.position(),
-                    myByteBuffer.remaining(), UTF_8);
-        } else {
-            final byte[] b = new byte[myByteBuffer.remaining()];
-            myByteBuffer.duplicate().get(b);
-            return new String(b);
+    private static class CommonResponse {
+        private final HashMap<String, Object> commonResponse;
+        public CommonResponse(String guild, String token, String action, Object data) {
+            commonResponse = new HashMap<>();
+            commonResponse.put("action", action);
+            commonResponse.put("guild", guild);
+            commonResponse.put("token", token);
+            commonResponse.put("data", data);
         }
-    }
 
+        @Override
+        public String toString() {
+            return "CommonResponse{" +
+                    "commonResponse=" + commonResponse +
+                    '}';
+        }
 
-    public void old() {
-        try {
-            Socket socket = new Socket("127.0.0.1", 8888);
-            socket.setKeepAlive(true);
-
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-
-            //String msg = in.readUTF();
-
-            //System.out.println("Server: " + msg);
-
-            //out.writeUTF("Ok Boss");  // Bad formatting cuz of utf-16
-            out.write("infinite".getBytes(UTF_8));
-            out.flush();
-            boolean go = true;
-            System.out.println("waiting");
-            String msg = new String(in.readAllBytes(), UTF_8);
-            System.out.println("got it");
-            System.out.println(msg);
-
-            out.close();
-            socket.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        public String toJson() {
+            return JsonStream.serialize(commonResponse);
         }
     }
 }
+

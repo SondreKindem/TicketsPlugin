@@ -25,6 +25,7 @@ public class TicketController {
                 ticket.setCreated(new Timestamp(System.currentTimeMillis()));
             }
             ticketDao.create(ticket);
+
             return ticket;
 
         } catch (SQLException ex) {
@@ -240,6 +241,14 @@ public class TicketController {
             return ticket;
         } catch (SQLException ex) {
             throw new TicketException("Could not add comment: " + ex.getMessage());
+        }
+    }
+
+    public void updateTicket(Ticket ticket) throws TicketException {
+        try {
+            ticketDao.update(ticket);
+        } catch (SQLException ex) {
+            throw new TicketException("Could not update ticket: " + ex.getMessage());
         }
     }
 }
