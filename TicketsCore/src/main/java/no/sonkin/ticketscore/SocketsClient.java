@@ -23,30 +23,6 @@ public class SocketsClient {
     private final String token;
     private final String guild;
 
-    private final String createString = """
-            {
-                "action": "create",
-                "guild": 692406121020915743,
-                "token": "nN9Br1Yw7pYcvpJztFL1BJiR_gl85yMh",
-                "data": {
-                    "ticketId": 666,
-                    "description": "OMG Jeg trenger hjelp! Newfarm admin abuser!!!1 zomg",
-                    "playerName": "Sonk1n",
-                    "discordUser": "Sondre",
-                    "playerUUID": "b1g-s7r1ng-1D",
-                    "server": "server name",
-                    "world": "world name",
-                    "x": 153,
-                    "y": 512,
-                    "z": 120,
-                    "created": 14125123213,
-                    "updated": 51652342342,
-                    "closed": false,
-                    "closedBy": "Sondre",
-                    "discordChannel": 802958441885990982
-                }
-            }
-            """;
     private final String commentString = """
             {
                 "action": "comment",
@@ -77,7 +53,7 @@ public class SocketsClient {
     }
 
     public static void main(String[] args) {
-        SocketsClient client = new SocketsClient("", "692406121020915743");
+        SocketsClient client = new SocketsClient("nN9Br1Yw7pYcvpJztFL1BJiR_gl85yMh", "692406121020915743");
         try {
             client.startConnection();
         } catch (IOException e) {
@@ -124,7 +100,7 @@ public class SocketsClient {
             }
 
             Any obj = JsonIterator.deserialize(response);
-            if(!obj.get("error").toString().equals("") && obj.get("error") != null){
+            if (!obj.get("error").toString().equals("") && obj.get("error") != null) {
                 System.err.println("Discord bot returned error while trying to send ticket: " + obj.get("error"));
             }
 
@@ -159,10 +135,6 @@ public class SocketsClient {
     public String sendAndReceiveMessage(String msg) {
         try {
             out.println(msg);
-
-            //out.println('{}');
-
-            //String resp = in.readLine();
 
             String line;
             StringBuilder sb = new StringBuilder();
@@ -200,13 +172,24 @@ public class SocketsClient {
                     System.out.println(sb.toString());
                     sb.delete(0, sb.length());
                 } else {
+                    System.out.println("\nRECEIVED LINE");
                     System.out.println(line);
                     sb.append(line);
-                    //Any result = JsonIterator.deserialize(line);
-                    //result.get("action").set("bufferDel");
-                    //System.out.println("Sending back");
-                    //System.out.println(result);
-                    out.println("{\"action\": \"bufferDel\", \"guild\": 692406121020915743, \"data\": {\"messageID\": 803711803875393597, \"ticketId\": 61, \"description\": \"this is a reply\", \"discordChannel\": 803711308041945138, \"playerName\": \"newfarm1\", \"created\": \"2021-01-26 20:43:46.232674\", \"closed\": false, \"closedBy\": \"\"}}");
+                    Any result = JsonIterator.deserialize(line);
+
+                    if(result.get("action").toString().equals("noBuffer")) {
+                        // TODO: send saved buffer now
+                        break;
+                    }
+
+                    HashMap<String, String> stuff = new HashMap<>();
+
+                    result.bindTo(stuff);
+                    stuff.put("action", "bufferDel");
+                    stuff.put("token", token);
+                    String json = JsonStream.serialize(stuff);
+                    System.out.println(json);
+                    out.println(json);
                 }
             }
 
@@ -227,8 +210,10 @@ public class SocketsClient {
             e.printStackTrace();
         }
     }
+
     private static class CommonResponse {
         private final HashMap<String, Object> commonResponse;
+
         public CommonResponse(String guild, String token, String action, Object data) {
             commonResponse = new HashMap<>();
             commonResponse.put("action", action);
