@@ -167,28 +167,10 @@ public class PluginMessager implements Listener {
             notification.setRecipientUUID(createdTicket.getPlayerUUID());
             BungeeTickets.getInstance().notifyAdmins(notification);
 
-            sendTicketToDiscord(ticket);
+            HandleSockets.sendTicket(ticket);
 
         } catch (TicketException e) {
             receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));
         }
-    }
-
-    private void sendTicketToDiscord(Ticket ticket) {
-        ProxyServer.getInstance().getScheduler().runAsync(
-                BungeeTickets.getInstance(),
-                () -> {
-                    String channelId = BungeeTickets.getInstance().getSocketsClientHelper().getClient().sendTicket(ticket);
-                    if(channelId != null) {
-                        try {
-                            ticket.setDiscordChannel(channelId);
-                            BungeeTickets.getInstance().getTicketsCore().getTicketController().updateTicket(ticket);
-                        } catch (TicketException e) {
-                            BungeeTickets.getInstance().getLogger().severe("Error while trying to set discord channel for ticket: " + e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }
-                }
-        );
     }
 }

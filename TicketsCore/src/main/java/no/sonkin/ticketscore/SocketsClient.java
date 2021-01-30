@@ -4,6 +4,7 @@ import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import com.jsoniter.output.JsonStream;
 import com.jsoniter.spi.JsonException;
+import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
@@ -59,7 +60,7 @@ public class SocketsClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(client.sendReceiveSend(client.bufferString));
+        System.out.println(client.fetchBuffer());
     }
 
     public void startConnection() throws IOException {
@@ -88,7 +89,6 @@ public class SocketsClient {
             System.out.println(json);
 
             this.startConnection();
-            System.out.println(ticket.toJson());
             //String response = this.sendAndReceiveMessage(json);
             String response = sendAndReceiveOnce(json);
 
@@ -105,11 +105,36 @@ public class SocketsClient {
             }
 
             return obj.get("data").get("discordChannel").toString();
-        } catch (JsonException | IOException ex) {
+        } catch (JsonException | IOException e) {
             stopConnection();
-            System.out.println(ex.getMessage());
+            System.out.println(e.getMessage());
             // ex.printStackTrace();
             return null;
+        }
+    }
+
+    public boolean sendComment(Comment comment) {
+        try {
+            String json = new CommonResponse(guild, token, "comment", comment).toJson();
+
+            System.out.println(json);
+
+            startConnection();
+
+            String response = sendAndReceiveOnce(json);
+
+            if (response == null) {
+                System.err.println("ERROR! Socket did not receive confirmation when trying to send comment");
+                return false;
+            }
+
+            System.out.println("RESPONSE: " + response);
+            return true;
+
+        } catch (IOException e) {
+            stopConnection();
+            System.out.println(e.getMessage());
+            return false;
         }
     }
 
@@ -120,7 +145,6 @@ public class SocketsClient {
         try {
             while ((line = in.readLine()) != null) {
                 if (!line.equals("~~/START/~~")) {
-                    System.out.println(line);
                     response = line;
                     break;
                 }
@@ -158,9 +182,15 @@ public class SocketsClient {
         }
     }
 
-    public String sendReceiveSend(String msg) {
+    /**
+     * Method for pinging the discord bot & retrieving any stored items.
+     * Once the bot has sent all its items, the plugin's stored items will be sent
+     *
+     * @return idk
+     */
+    public String fetchBuffer() {
         try {
-            out.println(msg);
+            out.println(new CommonResponse(guild, token, "buffer", null));
 
             String line;
             StringBuilder sb = new StringBuilder();
@@ -177,7 +207,7 @@ public class SocketsClient {
                     sb.append(line);
                     Any result = JsonIterator.deserialize(line);
 
-                    if(result.get("action").toString().equals("noBuffer")) {
+                    if (result.get("action").toString().equals("noBuffer")) {
                         // TODO: send saved buffer now
                         break;
                     }
@@ -203,9 +233,15 @@ public class SocketsClient {
 
     public void stopConnection() {
         try {
-            in.close();
-            out.close();
-            clientSocket.close();
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

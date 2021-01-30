@@ -7,8 +7,8 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
+import no.sonkin.bungeetickets.HandleSockets;
 import no.sonkin.bungeetickets.MessageBuilder;
-import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
@@ -121,6 +121,8 @@ public class TicketCommand extends BaseCommand {
             comment.setPlayerName(player.getName());
             comment.setPlayerUUID(player.getUniqueId());
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().addComment(comment, id);
+
+            HandleSockets.addComment(comment, ticket);
 
             player.sendMessage(MessageBuilder.info("Comment added"));
 

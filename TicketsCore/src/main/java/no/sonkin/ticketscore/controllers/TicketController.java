@@ -238,6 +238,7 @@ public class TicketController {
             }
 
             ticket.getComments().add(comment);
+
             return ticket;
         } catch (SQLException ex) {
             throw new TicketException("Could not add comment: " + ex.getMessage());
