@@ -14,13 +14,14 @@ import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 @CommandAlias("ticketadmin|ta")
 @CommandPermission("tickets.admin")
 public class TicketAdminCommand extends BaseCommand {
+    // TODO: delete comments & tickets - useful for offensive stuff
+    // TODO: ability to purge old tickets, maybe task for autopurging on startup
 
     @Subcommand("close")
     @Syntax("<id>")
