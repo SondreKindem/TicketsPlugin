@@ -4,8 +4,10 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import no.sonkin.ticketscore.controllers.BufferController;
 import no.sonkin.ticketscore.controllers.NotificationController;
 import no.sonkin.ticketscore.controllers.TicketController;
+import no.sonkin.ticketscore.models.BufferItem;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Notification;
 import no.sonkin.ticketscore.models.Ticket;
@@ -16,28 +18,30 @@ import java.sql.SQLException;
 
 public class TicketsCore {
 
-    private JdbcConnectionSource connection;
-    private File dataFolder;
-    private Dao<Ticket, Integer> ticketDao;
-    private Dao<Notification, Integer> notificationDao;
-    private TicketController ticketController;
-    private NotificationController notificationController;
+    private final JdbcConnectionSource connection;
+    private final File dataFolder;
+    private final TicketController ticketController;
+    private final NotificationController notificationController;
+    private final BufferController bufferController;
 
     public TicketsCore(File dataFolder, String dbType) throws SQLException, ClassNotFoundException, IOException {
         this.dataFolder = dataFolder;
 
         connection = getDBConnection(dbType);
 
-        ticketDao = DaoManager.createDao(connection, Ticket.class);
-        notificationDao = DaoManager.createDao(connection, Notification.class);
+        Dao<Ticket, Integer> ticketDao = DaoManager.createDao(connection, Ticket.class);
+        Dao<Notification, Integer> notificationDao = DaoManager.createDao(connection, Notification.class);
+        Dao<BufferItem, Integer> bufferDao = DaoManager.createDao(connection, BufferItem.class);
 
         ticketController = new TicketController(ticketDao);
         notificationController = new NotificationController(notificationDao);
+        bufferController = new BufferController(bufferDao);
 
 
         TableUtils.createTableIfNotExists(connection, Ticket.class);
         TableUtils.createTableIfNotExists(connection, Notification.class);
         TableUtils.createTableIfNotExists(connection, Comment.class);
+        TableUtils.createTableIfNotExists(connection, BufferItem.class);
 
         closeConnection();
     }
@@ -50,8 +54,12 @@ public class TicketsCore {
         return notificationController;
     }
 
+    public BufferController getBufferController() {
+        return bufferController;
+    }
+
     public void closeConnection() throws IOException {
-        if(connection != null) {
+        if (connection != null) {
             connection.close();
         }
     }

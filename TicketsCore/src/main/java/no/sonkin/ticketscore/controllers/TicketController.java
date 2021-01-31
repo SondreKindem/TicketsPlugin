@@ -1,8 +1,6 @@
 package no.sonkin.ticketscore.controllers;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.Where;
 import no.sonkin.ticketscore.exceptions.TicketException;
 import no.sonkin.ticketscore.models.Comment;
 import no.sonkin.ticketscore.models.Ticket;
@@ -13,7 +11,7 @@ import java.util.*;
 
 public class TicketController {
 
-    private Dao<Ticket, Integer> ticketDao;
+    private final Dao<Ticket, Integer> ticketDao;
 
     public TicketController(Dao<Ticket, Integer> ticketDao) {
         this.ticketDao = ticketDao;

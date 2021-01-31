@@ -49,6 +49,10 @@ public class Comment {
     // Helper field for sending tickets to discord
     private String discordChannel;
 
+    public Integer getID() {
+        return ID;
+    }
+
     public String getMessage() {
         return message;
     }
