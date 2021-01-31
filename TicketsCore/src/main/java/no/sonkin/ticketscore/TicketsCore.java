@@ -51,7 +51,9 @@ public class TicketsCore {
     }
 
     public void closeConnection() throws IOException {
-        connection.close();
+        if(connection != null) {
+            connection.close();
+        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

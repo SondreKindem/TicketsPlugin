@@ -14,7 +14,6 @@ import net.md_5.bungee.config.YamlConfiguration;
 import no.sonkin.bungeetickets.commands.TicketCommand;
 import no.sonkin.bungeetickets.commands.TicketAdminCommand;
 import no.sonkin.bungeetickets.listeners.EventListener;
-import no.sonkin.ticketscore.SocketsClient;
 import no.sonkin.ticketscore.SocketsClientHelper;
 import no.sonkin.ticketscore.TicketsCore;
 import no.sonkin.ticketscore.exceptions.TicketException;
@@ -23,7 +22,6 @@ import no.sonkin.ticketscore.models.Ticket;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -81,21 +79,18 @@ public class BungeeTickets extends Plugin {
 
             int frequency = config.contains("notify-frequency") ? config.getInt("notify-frequency") : 10;
             if (frequency > 0) {
-                ProxyServer.getInstance().getScheduler().schedule(this, new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            List<Ticket> openTickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getOpenTickets();
-                            if (openTickets != null && !openTickets.isEmpty()) {
-                                for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-                                    if (player.hasPermission("tickets.admin")) {
-                                        player.sendMessage(MessageBuilder.info("There are §a" + openTickets.size() + " §ropen tickets"));
-                                    }
+                ProxyServer.getInstance().getScheduler().schedule(this, () -> {
+                    try {
+                        List<Ticket> openTickets = BungeeTickets.getInstance().getTicketsCore().getTicketController().getOpenTickets();
+                        if (openTickets != null && !openTickets.isEmpty()) {
+                            for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+                                if (player.hasPermission("tickets.admin")) {
+                                    player.sendMessage(MessageBuilder.info("There are §a" + openTickets.size() + " §ropen tickets"));
                                 }
                             }
-                        } catch (TicketException e) {
-                            ProxyServer.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
                         }
+                    } catch (TicketException e) {
+                        ProxyServer.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
                     }
                 }, frequency, frequency, TimeUnit.MINUTES);
             }
@@ -104,13 +99,16 @@ public class BungeeTickets extends Plugin {
             getLogger().log(Level.SEVERE, ex.getMessage(), ex);
             getLogger().severe("Disabling plugin!");
             // There is no actual way of disabling the plugin, so we just disable listeners & commands
+            // TODO: Disable running tasks, like discord buffer
             getProxy().getPluginManager().unregisterListeners(this);
             getProxy().getPluginManager().unregisterCommands(this);
+            closeDbConnection();
         }
     }
 
     public void setupCommandManager() {
         BungeeCommandManager manager = new BungeeCommandManager(this);
+        //noinspection deprecation
         manager.enableUnstableAPI("help");
 
         // REGISTER COMMAND COMPLETIONS
@@ -262,6 +260,23 @@ public class BungeeTickets extends Plugin {
         for (ProxiedPlayer onlinePlayer : ProxyServer.getInstance().getPlayers()) {
             if (onlinePlayer.hasPermission("tickets.admin")) {
                 onlinePlayer.sendMessage(MessageBuilder.notification(notification, true));
+            }
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        closeDbConnection();
+        super.onDisable();
+        // TODO: Disable running tasks, like discord buffer
+    }
+
+    private void closeDbConnection() {
+        if(ticketsCore != null) {
+            try {
+                ticketsCore.closeConnection();
+            } catch (IOException e) {
+                getLogger().severe("Error while trying to close db connection: " + e.getMessage());
             }
         }
     }
