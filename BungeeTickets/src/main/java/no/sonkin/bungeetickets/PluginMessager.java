@@ -167,7 +167,9 @@ public class PluginMessager implements Listener {
             notification.setRecipientUUID(createdTicket.getPlayerUUID());
             BungeeTickets.getInstance().notifyAdmins(notification);
 
-            HandleSockets.sendTicket(ticket);
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                HandleSockets.sendTicket(ticket);
+            }
 
         } catch (TicketException e) {
             receiver.sendMessage(new TextComponent("§cCould not create ticket: " + e.getMessage()));

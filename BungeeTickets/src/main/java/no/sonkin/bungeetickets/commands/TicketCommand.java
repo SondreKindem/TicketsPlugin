@@ -45,11 +45,15 @@ public class TicketCommand extends BaseCommand {
     @Subcommand("close")
     @Syntax("<id>")
     @CommandCompletion("@openTicketsForPlayer")
-    @Description("Close a ticket")
+    @Description("Close a ticket. Can only be reopened by an admin!")
     public static void close(ProxiedPlayer sender, @Values("@openTicketsForPlayer") Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
             sender.sendMessage(MessageBuilder.info("Your ticket with id §a" + id + " §rwas closed."));
+
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                HandleSockets.closeTicket(ticket);
+            }
 
             Notification notification = new Notification();
             notification.setTicketId(ticket.getID());
@@ -110,7 +114,7 @@ public class TicketCommand extends BaseCommand {
         }
     }
 
-    @Subcommand("comment add")
+    @Subcommand("comment")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
     @CommandCompletion("@openTicketsForPlayer <message>")
@@ -122,7 +126,9 @@ public class TicketCommand extends BaseCommand {
             comment.setPlayerUUID(player.getUniqueId());
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().addComment(comment, id);
 
-            HandleSockets.addComment(comment, ticket);
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                HandleSockets.addComment(comment, ticket);
+            }
 
             player.sendMessage(MessageBuilder.info("Comment added"));
 

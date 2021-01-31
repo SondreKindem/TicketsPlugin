@@ -7,6 +7,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import no.sonkin.bungeetickets.BungeeTickets;
+import no.sonkin.bungeetickets.HandleSockets;
 import no.sonkin.bungeetickets.MessageBuilder;
 import no.sonkin.ticketscore.exceptions.NotificationException;
 import no.sonkin.ticketscore.exceptions.TicketException;
@@ -31,6 +32,10 @@ public class TicketAdminCommand extends BaseCommand {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                HandleSockets.closeTicket(ticket);
+            }
 
             Notification notification = new Notification();
             notification.setTicketId(ticket.getID());
@@ -65,6 +70,10 @@ public class TicketAdminCommand extends BaseCommand {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().reopenTicket(id, sender.getName());
             ProxiedPlayer ticketOwner = ProxyServer.getInstance().getPlayer(ticket.getPlayerUUID());
+
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                HandleSockets.reopenTicket(ticket);
+            }
 
             Notification notification = new Notification();
             notification.setTicketId(ticket.getID());
@@ -211,7 +220,7 @@ public class TicketAdminCommand extends BaseCommand {
         }
     }
 
-    @Subcommand("comment add")
+    @Subcommand("comment")
     @Description("List details for one of your tickets")
     @Syntax("[id] - defaults to latest ticket")
     @CommandCompletion("@allOpenTickets <message>")
@@ -222,6 +231,11 @@ public class TicketAdminCommand extends BaseCommand {
             comment.setPlayerName(player.getName());
             comment.setPlayerUUID(player.getUniqueId());
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().addComment(comment, id);
+
+            if(BungeeTickets.getInstance().socketsEnabled) {
+                // send to discord
+                HandleSockets.addComment(comment, ticket);
+            }
 
             player.sendMessage(MessageBuilder.info("Comment added"));
 

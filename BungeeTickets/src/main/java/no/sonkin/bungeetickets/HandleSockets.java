@@ -48,4 +48,32 @@ public class HandleSockets {
                 }
         );
     }
+
+    public static void closeTicket(Ticket ticket) {
+        ProxyServer.getInstance().getScheduler().runAsync(
+                BungeeTickets.getInstance(),
+                () -> {
+                    if(BungeeTickets.getInstance().getSocketsClientHelper().getClient().closeTicket(ticket)) {
+                        return;
+                    }
+
+                    // ADD TO BUFFER
+                    ProxyServer.getInstance().getLogger().info("CANT CLOSE TICKET, ADDING TO BUFFER");
+                }
+        );
+    }
+
+    public static void reopenTicket(Ticket ticket) {
+        ProxyServer.getInstance().getScheduler().runAsync(
+                BungeeTickets.getInstance(),
+                () -> {
+                    if(BungeeTickets.getInstance().getSocketsClientHelper().getClient().reopenTicket(ticket)) {
+                        return;
+                    }
+
+                    // ADD TO BUFFER
+                    ProxyServer.getInstance().getLogger().info("CANT REOPEN TICKET, ADDING TO BUFFER");
+                }
+        );
+    }
 }

@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.util.HashMap;
 
 
+//TODO: pass på at python gir ok respons på comment og close/reopen
+
 public class SocketsClient {
     private Socket clientSocket;
     private PrintWriter out;
@@ -73,7 +75,7 @@ public class SocketsClient {
         } catch (IOException e) {
             // e.printStackTrace();
             System.err.println("Could not connect to socket server!");
-            throw new IOException();
+            throw new IOException("Could not connect to socket server!");
         }
     }
 
@@ -84,7 +86,7 @@ public class SocketsClient {
      */
     public String sendTicket(Ticket ticket) {
         try {
-            String json = new CommonResponse(guild, token, "create", ticket).toJson();
+            String json = createResponse("create", ticket).toJson();
 
             System.out.println(json);
 
@@ -102,12 +104,13 @@ public class SocketsClient {
             Any obj = JsonIterator.deserialize(response);
             if (!obj.get("error").toString().equals("") && obj.get("error") != null) {
                 System.err.println("Discord bot returned error while trying to send ticket: " + obj.get("error"));
+                return null;
             }
 
             return obj.get("data").get("discordChannel").toString();
         } catch (JsonException | IOException e) {
             stopConnection();
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
             // ex.printStackTrace();
             return null;
         }
@@ -115,7 +118,7 @@ public class SocketsClient {
 
     public boolean sendComment(Comment comment) {
         try {
-            String json = new CommonResponse(guild, token, "comment", comment).toJson();
+            String json = createResponse("comment", comment).toJson();
 
             System.out.println(json);
 
@@ -128,12 +131,74 @@ public class SocketsClient {
                 return false;
             }
 
+            Any obj = JsonIterator.deserialize(response);
+            if (!obj.get("error").toString().equals("") && obj.get("error") != null) {
+                System.err.println("Discord bot returned error while trying to send comment: " + obj.get("error"));
+                return false;
+            }
+
             System.out.println("RESPONSE: " + response);
             return true;
 
         } catch (IOException e) {
             stopConnection();
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean closeTicket(Ticket ticket) {
+        try {
+            String json = createResponse("close", ticket).toJson();
+
+            startConnection();
+
+            String response = sendAndReceiveOnce(json);
+
+            if (response == null) {
+                System.err.println("ERROR! Socket did not receive confirmation when trying to close ticket");
+                return false;
+            }
+
+            Any obj = JsonIterator.deserialize(response);
+            if (!obj.get("error").toString().equals("") && obj.get("error") != null) {
+                System.err.println("Discord bot returned error while trying to close ticket: " + obj.get("error"));
+                return false;
+            }
+
+            System.out.println("RESPONSE: " + response);
+            return true;
+        } catch (IOException e) {
+            stopConnection();
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean reopenTicket(Ticket ticket) {
+        try {
+            String json = createResponse("reopen", ticket).toJson();
+
+            startConnection();
+
+            String response = sendAndReceiveOnce(json);
+
+            if (response == null) {
+                System.err.println("ERROR! Socket did not receive confirmation when trying to close ticket");
+                return false;
+            }
+
+            Any obj = JsonIterator.deserialize(response);
+            if (!obj.get("error").toString().equals("") && obj.get("error") != null) {
+                System.err.println("Discord bot returned error while trying to reopen ticket: " + obj.get("error"));
+                return false;
+            }
+
+            System.out.println("RESPONSE: " + response);
+            return true;
+        } catch (IOException e) {
+            stopConnection();
+            System.err.println(e.getMessage());
             return false;
         }
     }
@@ -190,7 +255,7 @@ public class SocketsClient {
      */
     public String fetchBuffer() {
         try {
-            out.println(new CommonResponse(guild, token, "buffer", null));
+            out.println(createResponse("buffer", null).toJson());
 
             String line;
             StringBuilder sb = new StringBuilder();
@@ -231,6 +296,9 @@ public class SocketsClient {
         }
     }
 
+    /**
+     * Close any open streams & sockets
+     */
     public void stopConnection() {
         try {
             if (in != null) {
@@ -247,6 +315,16 @@ public class SocketsClient {
         }
     }
 
+    /**
+     * Helper for simpler CommonResponse creation
+     */
+    private CommonResponse createResponse(String action, Object data) {
+        return new CommonResponse(guild, token, action, data);
+    }
+
+    /**
+     * An object containing the common socket response fields, for easy serialization
+     */
     private static class CommonResponse {
         private final HashMap<String, Object> commonResponse;
 
