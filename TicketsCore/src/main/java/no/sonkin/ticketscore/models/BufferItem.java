@@ -14,8 +14,34 @@ public class BufferItem {
     @DatabaseField(canBeNull = false)
     private int itemID;
 
+    public BufferItem(){}
+
     public BufferItem(String action, int itemID) {
         this.action = action;
+        this.itemID = itemID;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public int getItemID() {
+        return itemID;
+    }
+
+    public void setItemID(int itemID) {
         this.itemID = itemID;
     }
 }

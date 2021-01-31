@@ -28,6 +28,7 @@ public class TicketAdminCommand extends BaseCommand {
     @Syntax("<id>")
     @CommandCompletion("@allOpenTickets")
     @Description("Close a ticket")
+    // TODO: can close even if already closed
     public static void close(CommandSender sender, Integer id) {
         try {
             Ticket ticket = BungeeTickets.getInstance().getTicketsCore().getTicketController().closeTicket(id, sender.getName());
